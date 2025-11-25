@@ -1,61 +1,36 @@
 # Backend (Java)
 
-Base para el backend siguiendo arquitectura hexagonal, DDD y CQRS.
+Backend con Spring Boot 3 (WebFlux) siguiendo arquitectura hexagonal, DDD y CQRS. Incluye contextos de ejemplo para citas, barberos y clientes con adaptadores REST expuestos en `/api/*`.
 
-## Tecnologías sugeridas
-- Java 17+, Spring Boot (WebFlux o MVC según necesidad).
-- Gradle con el plugin [Scaffold Clean Architecture](https://bancolombia.github.io/scaffold-clean-architecture/docs/getting-started/).
-- Bases de datos SQL/NoSQL según contexto, mensajería (Kafka/RabbitMQ), JWT/OAuth2 para seguridad.
+## Tecnologías
+- Java 17, Spring Boot 3.2
+- Gradle Wrapper
+- Validaciones con Jakarta Validation
 
-## Cómo generar la estructura inicial
-1. Instalar JDK y Gradle.
-2. Ejecutar en la raíz del backend:
-   ```bash
-   gradle ca --package=com.empresa.barberiasaas --type=reactive --name=BarberiaSaaS
-   ```
-3. Crear modelos y repositorios por contexto (ejemplos):
-   ```bash
-   gradle gm --name=Cita
-   gradle gm --name=Cliente
-   gradle gm --name=Barbero
-   gradle gm --name=Producto
-   gradle gm --name=Factura
-   ```
-4. Crear casos de uso alineados a los comandos principales:
-   ```bash
-   gradle guc --name=CrearCita
-   gradle guc --name=RegistrarCliente
-   gradle guc --name=RegistrarPago
-   ```
-5. Generar adaptadores:
-   ```bash
-   gradle gda --type=jpa --name=citas
-   gradle gda --type=jpa --name=clientes
-   gradle gda --type=jpa --name=barberos
-   gradle gep --type=webflux --router=true
-   ```
+## Ejecutar
+Genera el wrapper localmente (no versionamos `gradle-wrapper.jar` para evitar binarios en el repo) y luego arranca el servicio:
+```bash
+gradle wrapper --gradle-version 8.14.3
+./gradlew bootRun
+```
 
-## Estructura recomendada por contexto
+### Endpoints principales
+- `POST /api/citas` crea una cita (`clientName`, `barberName`, `service`, `startAt`, `durationMinutes`).
+- `GET /api/citas` lista citas futuras desde ahora o un `from` opcional.
+- `GET /api/barberos` devuelve un catálogo semilla.
+- `POST /api/clientes` registra un cliente (`name`, `email`, `birthday`).
+- `GET /api/clientes` lista los clientes registrados.
+
+## Estructura
 ```
 backend/
-  citas/
-    application/command|query|handler|dto
-    domain/model|service|event
-    infrastructure/persistence|messaging|rest
-  barberos/
-  clientes/
-  inventario/
-  caja/
-  reportes/
-  shared/
+  src/main/java/com/empresa/barberiasaas/
+    citas/         # dominio y servicio de citas + controlador REST
+    barberos/      # catálogo semilla de barberos
+    clientes/      # registro en memoria de clientes
+    shared/        # espacio para utilidades comunes
 ```
 
-## Pruebas
-- **Unidad de dominio**: entidades, VOs, servicios.
-- **Integración de aplicación**: handlers con repositorios en memoria.
-- **Contrato de API**: REST Docs o equivalente.
-- **E2E**: flujos completos con base temporal y mensajería simulada.
-
-## Pasos siguientes
-- Configurar CI/CD con compilación, pruebas y análisis estático.
-- Añadir observabilidad (logs estructurados, métricas, tracing) y seguridad (cifrado de secretos, validación de entrada).
+## Próximos pasos
+- Añadir persistencia real por contexto (JPA/Reactive) y mensajería para eventos.
+- Dividir comandos/consultas explícitamente y cubrir con pruebas unitarias y de integración.

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Barbería">
+  <rect width="64" height="64" rx="10" fill="#0b1b2b"/>
+  <path d="M20 12h24l-4 40H24z" fill="#f2f2f7" stroke="#f8b400" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M26 18h12M25 26h14M24 34h16M23 42h18" stroke="#0b1b2b" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="52" r="4" fill="#f8b400"/>
+</svg>

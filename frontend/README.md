@@ -1,26 +1,33 @@
 # Frontend (Angular)
 
-SPA/PWA en Angular alineada a los contextos de dominio.
+SPA/PWA en Angular alineada a los contextos de dominio del SaaS de barberías. El proyecto consume el backend WebFlux para registrar
+clientes, consultar barberos sembrados y agendar citas en vivo desde la interfaz.
 
 ## Requerimientos
 - Node.js LTS + npm.
-- Angular CLI (`npm install -g @angular/cli`).
+- Angular CLI (`npm install -g @angular/cli`) opcional si quieres usar los comandos globales.
 
-## Crear el proyecto base
+## Ejecutar
 ```bash
-ng new barberia-spa --routing --style=scss --standalone
-cd barberia-spa
-ng add @angular/pwa
+cd frontend/barberia-spa
+npm install
+npm start
 ```
+La aplicación se sirve en `http://localhost:4200` y, gracias al `proxy.conf.json`, reenvía `/api/*` al backend local en
+`http://localhost:8080`.
+
+## Funcionalidad actual
+- Formulario para registrar clientes y refrescar el catálogo local en pantalla.
+- Formulario para agendar citas usando clientes creados y barberos seed (`/api/barberos`).
+- Tablas y listas que leen directamente `/api/clientes`, `/api/barberos` y `/api/citas` con botones de refresco.
 
 ## Estructura sugerida
 ```
-src/app/
+frontend/barberia-spa/src/app/
   core/              # auth, interceptors, guards
   shared/            # componentes y pipes reutilizables
   features/
     citas/
-      pages/ components/ services/ models/ store/
     barberos/
     clientes/
     inventario/
@@ -33,8 +40,3 @@ Se recomienda NgRx (o signals) para estado, módulos lazy por contexto y comunic
 - **Unitarias**: componentes, servicios y pipes con Karma/Jasmine o Vitest.
 - **Integración**: módulos feature montados con TestBed.
 - **E2E**: Cypress para flujos de reserva, pagos y reportes.
-
-## Próximos pasos
-- Configurar rutas por rol/plan, guards y layouts compartidos.
-- Incorporar diseño responsive y accesibilidad.
-- Preparar CI/CD con `npm run lint`, `npm run test` y `npm run e2e`.

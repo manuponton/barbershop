@@ -1,0 +1,16 @@
+# Backend build artifacts
+backend/build/
+backend/.gradle/
+backend/out/
+
+# Frontend dependencies
+frontend/barberia-spa/node_modules/
+frontend/barberia-spa/dist/
+
+# OS/IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Gradle wrapper binary (regenerar con gradle wrapper)
+backend/gradle/wrapper/gradle-wrapper.jar
