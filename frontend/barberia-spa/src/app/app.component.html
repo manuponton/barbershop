@@ -1,0 +1,164 @@
+<main class="layout">
+  <section class="hero">
+    <p class="eyebrow">Arquitectura hexagonal • CQRS • PWA</p>
+    <h1>{{ title }}</h1>
+    <p class="lead">
+      SPA conectada al backend WebFlux: registra clientes, consulta barberos sembrados y agenda citas en vivo contra los endpoints
+      expuestos.
+    </p>
+    <div class="cta">
+      <a class="btn" href="/api/citas" rel="noreferrer">Probar API de citas</a>
+      <a class="btn ghost" href="/api/barberos" rel="noreferrer">Ver barberos seed</a>
+    </div>
+
+    <div class="alerts">
+      <p class="alert success" *ngIf="requestSuccess">{{ requestSuccess }}</p>
+      <p class="alert error" *ngIf="requestError">{{ requestError }}</p>
+    </div>
+  </section>
+
+  <section class="grid actions">
+    <article class="card form-card">
+      <header>
+        <p class="eyebrow">Clientes</p>
+        <h2>Registrar cliente</h2>
+      </header>
+      <form class="form" [formGroup]="clientForm" (ngSubmit)="registerClient()">
+        <label>
+          Nombre
+          <input type="text" formControlName="name" placeholder="María López" />
+          <span class="hint" *ngIf="clientForm.controls.name.invalid && clientForm.controls.name.touched">Nombre requerido</span>
+        </label>
+        <label>
+          Email
+          <input type="email" formControlName="email" placeholder="correo@dominio.com" />
+          <span class="hint" *ngIf="clientForm.controls.email.invalid && clientForm.controls.email.touched">Email válido</span>
+        </label>
+        <label>
+          Cumpleaños
+          <input type="date" formControlName="birthday" />
+        </label>
+        <button class="btn" type="submit">Guardar cliente</button>
+      </form>
+    </article>
+
+    <article class="card form-card">
+      <header>
+        <p class="eyebrow">Citas</p>
+        <h2>Agendar cita</h2>
+      </header>
+      <p class="hint" *ngIf="!hasClients() || !hasBarbers()">
+        Registra un cliente y utiliza un barbero seed para habilitar el formulario.
+      </p>
+      <form class="form" [formGroup]="appointmentForm" (ngSubmit)="createAppointment()">
+        <label>
+          Cliente
+          <select formControlName="clientName">
+            <option value="" disabled>Selecciona un cliente</option>
+            <option *ngFor="let client of clients()" [value]="client.name">{{ client.name }}</option>
+          </select>
+        </label>
+        <label>
+          Barbero
+          <select formControlName="barberName">
+            <option value="" disabled>Selecciona un barbero</option>
+            <option *ngFor="let barber of barbers()" [value]="barber.name">{{ barber.name }} ({{ barber.specialty }})</option>
+          </select>
+        </label>
+        <label>
+          Servicio
+          <input type="text" formControlName="service" placeholder="Corte + barba" />
+        </label>
+        <label>
+          Inicio
+          <input type="datetime-local" formControlName="startAt" />
+        </label>
+        <label>
+          Duración (min)
+          <input type="number" min="10" step="5" formControlName="duration" />
+        </label>
+        <button class="btn" type="submit" [disabled]="!hasClients() || !hasBarbers()">Crear cita</button>
+      </form>
+    </article>
+  </section>
+
+  <section class="card data-card">
+    <header class="data-header">
+      <div>
+        <p class="eyebrow">Contextos activos</p>
+        <h2>Catálogos y citas en vivo</h2>
+      </div>
+      <div class="actions-inline">
+        <button class="btn ghost" type="button" (click)="loadCatalogs()">Refrescar catálogos</button>
+        <button class="btn ghost" type="button" (click)="loadAppointments()">Refrescar citas</button>
+      </div>
+    </header>
+
+    <div class="list-grid">
+      <div>
+        <h3>Barberos disponibles</h3>
+        <ul class="list" *ngIf="hasBarbers(); else emptyBarbers">
+          <li *ngFor="let barber of barbers()">
+            <strong>{{ barber.name }}</strong>
+            <small>{{ barber.specialty }}</small>
+          </li>
+        </ul>
+        <ng-template #emptyBarbers><p class="hint">Sin barberos cargados.</p></ng-template>
+      </div>
+
+      <div>
+        <h3>Clientes registrados</h3>
+        <ul class="list" *ngIf="hasClients(); else emptyClients">
+          <li *ngFor="let client of clients()">
+            <strong>{{ client.name }}</strong>
+            <small>{{ client.email }}</small>
+          </li>
+        </ul>
+        <ng-template #emptyClients><p class="hint">Aún no hay clientes.</p></ng-template>
+      </div>
+    </div>
+
+    <div class="appointments">
+      <header>
+        <h3>Próximas citas</h3>
+        <p class="hint">Lectura directa de `/api/citas`.</p>
+      </header>
+      <table *ngIf="hasAppointments(); else emptyAppointments">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Barbero</th>
+            <th>Servicio</th>
+            <th>Inicio</th>
+            <th>Duración</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cita of appointments()">
+            <td>{{ cita.clientName }}</td>
+            <td>{{ cita.barberName }}</td>
+            <td>{{ cita.service }}</td>
+            <td>{{ cita.startAt | date: 'short' }}</td>
+            <td>{{ cita.duration }} min</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #emptyAppointments>
+        <p class="hint">Crea tu primera cita para ver el listado.</p>
+      </ng-template>
+    </div>
+  </section>
+
+  <section class="card endpoints">
+    <header>
+      <p class="eyebrow">Adaptadores expuestos</p>
+      <h2>Endpoints iniciales</h2>
+    </header>
+    <ul>
+      <li *ngFor="let endpoint of endpoints">
+        <code>{{ endpoint.path }}</code>
+        <span>{{ endpoint.description }}</span>
+      </li>
+    </ul>
+  </section>
+</main>

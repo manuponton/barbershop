@@ -1,30 +1,38 @@
 # BarberShop SaaS
 
-Diseño y guía de arranque para un SaaS de barberías con planes de suscripción (Básico, Pro y Premium). El sistema aplica DDD, arquitectura hexagonal, CQRS, SOLID, Clean Code y TDD.
+Diseño y base funcional para un SaaS de barberías con planes de suscripción (Básico, Pro y Premium). El sistema aplica DDD, arquitectura hexagonal, CQRS, SOLID, Clean Code y TDD.
 
 ## Estructura del repositorio
 - `docs/arquitectura.md`: detalles completos de arquitectura, módulos, planes y roadmap.
-- `backend/`: guía para generar el backend Java con el plugin Scaffold Clean Architecture y estructura por contextos.
-- `frontend/`: guía para crear la SPA/PWA en Angular.
+- `backend/`: backend Java Spring Boot WebFlux con contextos de ejemplo (citas, barberos, clientes).
+- `frontend/barberia-spa`: SPA Angular generada con Angular CLI, conectada al backend para registrar clientes y agendar citas.
 
-## Cómo empezar
+## Cómo ejecutar
 ### Backend (Java)
-1. Instalar JDK y Gradle.
-2. Generar la base con el plugin de Clean Architecture:
+1. Requiere JDK 17+. Para evitar binaries en el repo, genera localmente el wrapper:
    ```bash
-   gradle ca --package=com.empresa.barberiasaas --type=reactive --name=BarberiaSaaS
+   cd backend
+   gradle wrapper --gradle-version 8.14.3
    ```
-3. Crear modelos, casos de uso y adaptadores por contexto (citas, barberos, clientes, inventario, caja, reportes). Consulta `backend/README.md` para comandos sugeridos.
+   (si ya tienes `gradle-wrapper.jar` porque lo generaste una vez, puedes saltar este paso).
+2. Desde `backend/` ejecutar:
+   ```bash
+   ./gradlew bootRun
+   ```
+3. Endpoints disponibles:
+   - `POST /api/citas` crear cita.
+   - `GET /api/citas` listar próximas citas.
+   - `GET /api/barberos` barberos sembrados.
+   - `POST /api/clientes` y `GET /api/clientes` para registro y consulta.
 
 ### Frontend (Angular)
-1. Instalar Node.js y Angular CLI.
-2. Crear la SPA/PWA:
+1. Instalar Node.js LTS.
+2. Desde `frontend/barberia-spa` instalar dependencias y arrancar (usa `proxy.conf.json` para apuntar al backend en `localhost:8080`):
    ```bash
-   ng new barberia-spa --routing --style=scss --standalone
-   cd barberia-spa
-   ng add @angular/pwa
+   npm install
+   npm start
    ```
-3. Estructurar módulos por contexto (citas, barberos, clientes, inventario, caja, reportes). Ver `frontend/README.md`.
+   Por defecto corre en `http://localhost:4200` y consume los endpoints anteriores.
 
 ## Buenas prácticas y pruebas
 - Aplicar TDD en dominio y aplicación; documentar contratos de API y ejecutar pruebas E2E para flujos clave.

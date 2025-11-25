@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: barberia-saas
+server:
+  port: 8080
