@@ -5,11 +5,13 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 
 interface BarberResponse {
+  id: string;
   name: string;
-  specialty: string;
+  services: string[];
 }
 
 interface ClientResponse {
+  id: string;
   name: string;
   email: string;
   birthday: string;
@@ -21,7 +23,7 @@ interface AppointmentResponse {
   barberName: string;
   service: string;
   startAt: string;
-  duration: number;
+  durationMinutes: number;
 }
 
 @Component({
@@ -127,8 +129,8 @@ export class AppComponent implements OnInit {
     const raw = this.appointmentForm.getRawValue();
     const payload = {
       ...raw,
-      startAt: new Date(raw.startAt as string).toISOString(),
-      duration: Number(raw.duration)
+      startAt: raw.startAt,
+      durationMinutes: Number(raw.duration)
     };
 
     this.http.post<AppointmentResponse>(`${this.apiBase}/citas`, payload).subscribe({

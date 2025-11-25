@@ -62,7 +62,7 @@
           Barbero
           <select formControlName="barberName">
             <option value="" disabled>Selecciona un barbero</option>
-            <option *ngFor="let barber of barbers()" [value]="barber.name">{{ barber.name }} ({{ barber.specialty }})</option>
+            <option *ngFor="let barber of barbers()" [value]="barber.name">{{ barber.name }} ({{ barber.services.join(', ') }})</option>
           </select>
         </label>
         <label>
@@ -100,7 +100,7 @@
         <ul class="list" *ngIf="hasBarbers(); else emptyBarbers">
           <li *ngFor="let barber of barbers()">
             <strong>{{ barber.name }}</strong>
-            <small>{{ barber.specialty }}</small>
+            <small>{{ barber.services.join(', ') }}</small>
           </li>
         </ul>
         <ng-template #emptyBarbers><p class="hint">Sin barberos cargados.</p></ng-template>
@@ -139,7 +139,7 @@
             <td>{{ cita.barberName }}</td>
             <td>{{ cita.service }}</td>
             <td>{{ cita.startAt | date: 'short' }}</td>
-            <td>{{ cita.duration }} min</td>
+            <td>{{ cita.durationMinutes }} min</td>
           </tr>
         </tbody>
       </table>
