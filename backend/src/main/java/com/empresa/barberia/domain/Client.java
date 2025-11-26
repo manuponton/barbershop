@@ -1,0 +1,6 @@
+package com.empresa.barberia.domain;
+
+import java.time.LocalDate;
+
+public record Client(String id, String name, String email, LocalDate birthday) {
+}
