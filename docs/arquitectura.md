@@ -96,6 +96,18 @@ Los contextos delimitados aplican lenguaje ubicuo y agregados propios.
 - **Reportes** (Pro+): operativos, financieros y dashboards avanzados (Premium).
 - **Servicios transversales**: autenticación/autorización, notificaciones, mensajería y multi-sucursal (Premium).
 
+### Requerimientos funcionales adicionales
+Los siguientes temas deben incorporarse de manera explícita en los contextos y planes existentes:
+
+- **Módulo de agendamiento**: gestión fina de slots, reglas de disponibilidad, bloqueos manuales y optimización de turnos por barbero.
+- **Trazabilidad de servicios**: bitácora de estados de cada cita (creada, confirmada, en servicio, completada, cancelada) con auditoría de cambios.
+- **Manejo de data por barbero**: analítica por profesional (rendimiento, ticket promedio, recurrencia de clientes, tiempos muertos) y comparativos entre sucursales.
+- **Productos**: catálogo de retail y consumo interno ligado a inventario y caja; soporte para combos/paquetes junto con servicios.
+- **Temas de los servicios**: taxonomía de servicios (cortes clásicos, grooming, coloración, tratamientos) para segmentar catálogos y búsquedas.
+- **Ciclo de vida del cliente**: estados y eventos clave (lead, primer servicio, recurrente, inactivo) asociados a campañas y recordatorios.
+- **Servicios complementarios**: cross-sell/up-sell configurables (bebidas, tratamientos express, membresías) sugeridos en agenda y POS.
+- **Reportes de marketing**: tableros y exportes para identificar estrategias (segmentos rentables, canales de adquisición, cohortes y conversión por campaña).
+
 ### Tabla de planes
 | Funcionalidad clave | Básico | Pro | Premium |
 | --- | --- | --- | --- |

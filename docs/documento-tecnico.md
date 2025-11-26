@@ -55,3 +55,4 @@ Este documento resume las decisiones técnicas, la arquitectura y la funcionalid
 - Formalizar CQRS con buses de comando/consulta y proyecciones para reportes.
 - Añadir autenticación/autorización, notificaciones y pruebas automatizadas (unitarias, integración y E2E) en CI/CD.
 - Estructurar el frontend con módulos por contexto y gestión de estado (NgRx o signals compartidas) para escalar features Pro/Premium.
+- Incorporar requerimientos funcionales adicionales solicitados: agendamiento avanzado, trazabilidad de servicios, analítica por barbero, catálogo de productos, taxonomía de servicios, ciclo de vida del cliente, servicios complementarios y reportes de marketing.
