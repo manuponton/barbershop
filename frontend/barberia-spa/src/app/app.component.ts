@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
 interface BarberResponse {
   id: string;
@@ -26,6 +27,13 @@ interface AppointmentResponse {
   durationMinutes: number;
 }
 
+interface FeatureCard {
+  context: string;
+  description: string;
+  status: 'online' | 'en-progreso';
+  actions: string[];
+}
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -37,7 +45,48 @@ export class AppComponent implements OnInit {
   readonly title = 'Barbería SaaS';
   readonly apiBase = '/api';
 
-  readonly contexts = ['Citas', 'Barberos', 'Clientes', 'Inventario', 'Caja', 'Reportes'];
+  readonly featureMatrix: FeatureCard[] = [
+    {
+      context: 'Citas',
+      description: 'Agenda nuevas citas y consulta las próximas visitas de clientes.',
+      status: 'online',
+      actions: [
+        'Crear citas con duración validada',
+        'Listar próximas citas en vivo',
+        'Refrescar manualmente el listado'
+      ]
+    },
+    {
+      context: 'Barberos',
+      description: 'Consulta el catálogo sembrado de barberos y sus servicios.',
+      status: 'online',
+      actions: ['Catálogo base disponible', 'Servicios ofrecidos por barbero', 'Compatibilidad con formulario de citas']
+    },
+    {
+      context: 'Clientes',
+      description: 'Registra y consulta clientes con validaciones en el frontend.',
+      status: 'online',
+      actions: ['Validación de email y nombre', 'Reset de formulario con mensajes', 'Selección directa en agenda de citas']
+    },
+    {
+      context: 'Inventario',
+      description: 'Catálogo de productos y control de stock planificado para iteración siguiente.',
+      status: 'en-progreso',
+      actions: ['Modelado de productos y variantes', 'Alertas de stock bajo', 'Integración con caja y servicios']
+    },
+    {
+      context: 'Caja',
+      description: 'Cierre de caja y seguimiento de ventas programado para la versión Pro.',
+      status: 'en-progreso',
+      actions: ['Registro de ventas por servicio', 'Conciliación diaria', 'Métricas de tickets por barbero']
+    },
+    {
+      context: 'Reportes',
+      description: 'Reportes de marketing y retención para clientes frecuentes en el roadmap.',
+      status: 'en-progreso',
+      actions: ['Panel de retención y recurrencia', 'Analítica por barbero', 'Exportación de métricas']
+    }
+  ];
 
   readonly endpoints = [
     { path: '/api/citas', description: 'Crear y consultar citas (POST, GET)' },
@@ -66,9 +115,23 @@ export class AppComponent implements OnInit {
   readonly hasBarbers = computed(() => this.barbers().length > 0);
   readonly hasClients = computed(() => this.clients().length > 0);
   readonly hasAppointments = computed(() => this.appointments().length > 0);
+  readonly summary = computed(() => ({
+    barbers: this.barbers().length,
+    clients: this.clients().length,
+    appointments: this.appointments().length
+  }));
+  readonly sortedAppointments = computed(() =>
+    [...this.appointments()].sort(
+      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
+    )
+  );
 
   requestError = '';
   requestSuccess = '';
+  loadingCatalogs = false;
+  loadingAppointments = false;
+  submittingClient = false;
+  submittingAppointment = false;
 
   constructor(private readonly http: HttpClient, private readonly fb: FormBuilder) {}
 
@@ -78,27 +141,41 @@ export class AppComponent implements OnInit {
   }
 
   loadCatalogs(): void {
-    this.http.get<BarberResponse[]>(`${this.apiBase}/barberos`).subscribe({
-      next: (barbers) => this.barbers.set(barbers),
-      error: (err) => this.handleError('No se pudieron cargar los barberos', err)
-    });
+    this.loadingCatalogs = true;
 
-    this.http.get<ClientResponse[]>(`${this.apiBase}/clientes`).subscribe({
-      next: (clients) => this.clients.set(clients),
-      error: (err) => this.handleError('No se pudieron cargar los clientes', err)
+    forkJoin({
+      barbers: this.http.get<BarberResponse[]>(`${this.apiBase}/barberos`),
+      clients: this.http.get<ClientResponse[]>(`${this.apiBase}/clientes`)
+    }).subscribe({
+      next: ({ barbers, clients }) => {
+        this.barbers.set(barbers);
+        this.clients.set(clients);
+        this.loadingCatalogs = false;
+      },
+      error: (err) => {
+        this.loadingCatalogs = false;
+        this.handleError('No se pudieron cargar los catálogos', err);
+      }
     });
   }
 
   loadAppointments(): void {
+    this.loadingAppointments = true;
+
     this.http.get<AppointmentResponse[]>(`${this.apiBase}/citas`).subscribe({
       next: (citas) => this.appointments.set(citas),
-      error: (err) => this.handleError('No se pudieron cargar las citas', err)
+      error: (err) => this.handleError('No se pudieron cargar las citas', err),
+      complete: () => (this.loadingAppointments = false)
     });
   }
 
   registerClient(): void {
     this.requestError = '';
     this.requestSuccess = '';
+
+    if (this.submittingClient) {
+      return;
+    }
 
     if (this.clientForm.invalid) {
       this.clientForm.markAllAsTouched();
@@ -107,19 +184,29 @@ export class AppComponent implements OnInit {
 
     const payload = this.clientForm.getRawValue();
 
+    this.submittingClient = true;
+
     this.http.post<ClientResponse>(`${this.apiBase}/clientes`, payload).subscribe({
       next: (client) => {
         this.clients.set([client, ...this.clients()]);
         this.requestSuccess = `Cliente ${client.name} registrado.`;
         this.clientForm.reset();
+        this.submittingClient = false;
       },
-      error: (err) => this.handleError('No se pudo registrar el cliente', err)
+      error: (err) => {
+        this.submittingClient = false;
+        this.handleError('No se pudo registrar el cliente', err);
+      }
     });
   }
 
   createAppointment(): void {
     this.requestError = '';
     this.requestSuccess = '';
+
+    if (this.submittingAppointment) {
+      return;
+    }
 
     if (this.appointmentForm.invalid) {
       this.appointmentForm.markAllAsTouched();
@@ -133,6 +220,8 @@ export class AppComponent implements OnInit {
       durationMinutes: Number(raw.duration)
     };
 
+    this.submittingAppointment = true;
+
     this.http.post<AppointmentResponse>(`${this.apiBase}/citas`, payload).subscribe({
       next: (appointment) => {
         this.appointments.set([appointment, ...this.appointments()]);
@@ -144,8 +233,12 @@ export class AppComponent implements OnInit {
           clientName: '',
           barberName: ''
         });
+        this.submittingAppointment = false;
       },
-      error: (err) => this.handleError('No se pudo crear la cita', err)
+      error: (err) => {
+        this.submittingAppointment = false;
+        this.handleError('No se pudo crear la cita', err);
+      }
     });
   }
 
