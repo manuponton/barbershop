@@ -1,6 +1,6 @@
 # Backend (Java)
 
-Backend con Spring Boot 3 (WebFlux) siguiendo arquitectura hexagonal, DDD y CQRS. Incluye contextos de ejemplo para citas, barberos y clientes con adaptadores REST expuestos en `/api/*`.
+Backend ligero con Spring Boot 3 (WebFlux) siguiendo principios de dominio (DDD), arquitectura hexagonal y CQRS. Expone adaptadores REST para los contextos iniciales de citas, barberos y clientes, almacenando los datos en memoria para facilitar la demostración junto al frontend Angular.
 
 ## Tecnologías
 - Java 17, Spring Boot 3.2
@@ -8,27 +8,30 @@ Backend con Spring Boot 3 (WebFlux) siguiendo arquitectura hexagonal, DDD y CQRS
 - Validaciones con Jakarta Validation
 
 ## Ejecutar
-Genera el wrapper localmente (no versionamos `gradle-wrapper.jar` para evitar binarios en el repo) y luego arranca el servicio:
+El wrapper (`gradle/wrapper/gradle-wrapper.jar`) está ignorado, pero puedes regenerarlo con Gradle 8.14.3 y luego levantar el servicio:
+
 ```bash
+cd backend
 gradle wrapper --gradle-version 8.14.3
 ./gradlew bootRun
 ```
 
+Los endpoints están disponibles en `http://localhost:8080` y se consumen desde la SPA con `proxy.conf.json`.
+
 ### Endpoints principales
 - `POST /api/citas` crea una cita (`clientName`, `barberName`, `service`, `startAt`, `durationMinutes`).
-- `GET /api/citas` lista citas futuras desde ahora o un `from` opcional.
+- `GET /api/citas` lista las citas registradas.
 - `GET /api/barberos` devuelve un catálogo semilla.
 - `POST /api/clientes` registra un cliente (`name`, `email`, `birthday`).
 - `GET /api/clientes` lista los clientes registrados.
 
 ## Estructura
 ```
-backend/
-  src/main/java/com/empresa/barberiasaas/
-    citas/         # dominio y servicio de citas + controlador REST
-    barberos/      # catálogo semilla de barberos
-    clientes/      # registro en memoria de clientes
-    shared/        # espacio para utilidades comunes
+src/main/java/com/empresa/barberia
+  api/                  # Controladores REST y DTOs
+  domain/               # Modelos de dominio inmutables
+  repository/           # Adaptadores en memoria
+  service/              # Casos de uso de aplicación
 ```
 
 ## Próximos pasos
