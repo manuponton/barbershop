@@ -1,0 +1,48 @@
+<section class="card data-card">
+  <header class="data-header">
+    <div>
+      <p class="eyebrow">Gestión de reseñas</p>
+      <h2>Feedback y fidelización</h2>
+      <p class="hint">Visualiza reseñas recientes, planes de seguimiento y acciones de puntos.</p>
+    </div>
+    <span class="status active">Feedback activo</span>
+  </header>
+
+  <div class="list-grid">
+    <div>
+      <h3>Reseñas recientes</h3>
+      <ul class="list" *ngIf="reviews.length; else emptyReviews">
+        <li *ngFor="let review of reviews">
+          <div>
+            <strong>{{ review.rating }} ★ en {{ review.channel }}</strong>
+            <small>{{ review.comment }}</small>
+          </div>
+          <small>{{ review.createdAt | date: 'short' }}</small>
+        </li>
+      </ul>
+      <ng-template #emptyReviews>
+        <p class="hint">Aún no hay reseñas registradas.</p>
+      </ng-template>
+    </div>
+
+    <div>
+      <h3>Acciones de fidelización</h3>
+      <ul class="list" *ngIf="loyaltyActions.length; else emptyActions">
+        <li *ngFor="let action of loyaltyActions">
+          <div>
+            <strong>{{ action.program }}</strong>
+            <small>{{ action.points }} pts · {{ action.reason || 'Recurrencia' }}</small>
+          </div>
+          <small>{{ action.appliedAt | date: 'short' }}</small>
+        </li>
+      </ul>
+      <ng-template #emptyActions>
+        <p class="hint">Sin acciones de fidelización registradas.</p>
+      </ng-template>
+    </div>
+  </div>
+
+  <div *ngIf="notifications.length" class="hint">
+    {{ notifications.length }} notificación(es) de seguimiento programadas.
+  </div>
+</section>

@@ -9,11 +9,23 @@ import {
   BarberResponse,
   CatalogItem,
   CatalogoResponse,
+  CashSessionResponse,
   ClientPayload,
+  ClientNotificationResponse,
   ClientResponse,
   EndpointDescriptor,
   FeatureCard,
   SucursalResponse
+  ClientSegment,
+  ClientReview,
+  LoyaltyActionResponse
+  MovementPayload,
+  PaymentPayload,
+  ProductPayload,
+  ProductResponse,
+  SalesProjection,
+  SalesReport,
+  StockSnapshot
 } from './models';
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
 import { MetricsGridComponent } from './components/metrics-grid/metrics-grid.component';
@@ -25,6 +37,11 @@ import { FeatureMapComponent } from './components/feature-map/feature-map.compon
 import { BranchSelectorComponent } from './features/branch-selector/branch-selector.component';
 import { BrandingPreviewComponent } from './features/branding-preview/branding-preview.component';
 import { CatalogShowcaseComponent } from './features/catalog-showcase/catalog-showcase.component';
+import { ClientCampaignsComponent } from './features/clientes/client-campaigns/client-campaigns.component';
+import { ClientCohortsComponent } from './features/clientes/client-cohorts/client-cohorts.component';
+import { ClientReviewsComponent } from './features/clientes/client-reviews/client-reviews.component';
+import { InventoryViewComponent } from './features/inventory-view/inventory-view.component';
+import { SalesViewComponent } from './features/sales-view/sales-view.component';
 
 @Component({
   selector: 'app-root',
@@ -42,6 +59,11 @@ import { CatalogShowcaseComponent } from './features/catalog-showcase/catalog-sh
     BranchSelectorComponent,
     BrandingPreviewComponent,
     CatalogShowcaseComponent
+    ClientCampaignsComponent,
+    ClientCohortsComponent,
+    ClientReviewsComponent
+    InventoryViewComponent,
+    SalesViewComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
@@ -49,6 +71,8 @@ import { CatalogShowcaseComponent } from './features/catalog-showcase/catalog-sh
 export class AppComponent implements OnInit {
   readonly title = 'Barbería SaaS';
   readonly apiBase = '/api';
+  readonly clientApiBase = '/api/v1';
+  readonly apiV1 = '/api/v1';
 
   readonly featureMatrix: FeatureCard[] = [
     {
@@ -69,21 +93,25 @@ export class AppComponent implements OnInit {
     },
     {
       context: 'Clientes',
-      description: 'Registra y consulta clientes con validaciones en el frontend.',
+      description: 'Registra, segmenta y coordina campañas de clientes.',
       status: 'online',
-      actions: ['Validación de email y nombre', 'Reset de formulario con mensajes', 'Selección directa en agenda de citas']
+      actions: [
+        'Validación de email y nombre',
+        'Segmentación con recordatorios',
+        'Reseñas vinculadas a campañas y cohortes'
+      ]
     },
     {
       context: 'Inventario',
-      description: 'Catálogo de productos y control de stock planificado para iteración siguiente.',
-      status: 'en-progreso',
-      actions: ['Modelado de productos y variantes', 'Alertas de stock bajo', 'Integración con caja y servicios']
+      description: 'Catálogo de productos y control de stock para el plan Pro.',
+      status: 'online',
+      actions: ['Crear productos retail e internos', 'Registrar compras y ventas', 'Reportes básicos de stock y consumo']
     },
     {
       context: 'Caja',
-      description: 'Cierre de caja y seguimiento de ventas programado para la versión Pro.',
-      status: 'en-progreso',
-      actions: ['Registro de ventas por servicio', 'Conciliación diaria', 'Métricas de tickets por barbero']
+      description: 'Facturación POS con integración a pasarela y arqueo diario.',
+      status: 'online',
+      actions: ['Apertura y cierre de caja', 'Pagos POS con pasarela simulada', 'Reporte de ventas aprobadas/rechazadas']
     },
     {
       context: 'Reportes',
@@ -99,6 +127,14 @@ export class AppComponent implements OnInit {
     { path: '/api/clientes', description: 'Registro y listado de clientes' },
     { path: '/api/v1/sucursales', description: 'Contexto multi-sucursal y branding' },
     { path: '/api/v1/catalogo', description: 'Catálogo público para vitrina online' }
+    { path: '/api/v1/clientes', description: 'Registro, ciclo de vida y catálogo de clientes' },
+    { path: '/api/v1/clientes/segmentos', description: 'Segmentación con recordatorios (POST, GET)' },
+    { path: '/api/v1/clientes/reseñas', description: 'Registro y lectura de reseñas vinculadas a cohortes' },
+    { path: '/api/v1/clientes/fidelizacion/acciones', description: 'Acreditación de puntos, notas y recordatorios' },
+    { path: '/api/v1/clientes/notificaciones', description: 'Gestión de notificaciones y recordatorios a clientes' }
+    { path: '/api/clientes', description: 'Registro y listado de clientes' },
+    { path: '/api/v1/inventario', description: 'Productos, compras/ventas y reportes de stock' },
+    { path: '/api/v1/caja', description: 'Apertura/cierre de caja, pagos POS y reportes de ventas' }
   ];
 
   readonly sucursales = signal<SucursalResponse[]>([]);
@@ -107,14 +143,25 @@ export class AppComponent implements OnInit {
   readonly clients = signal<ClientResponse[]>([]);
   readonly appointments = signal<AppointmentResponse[]>([]);
   readonly selectedSucursalId = signal<string>('');
+  readonly segments = signal<ClientSegment[]>([]);
+  readonly reviews = signal<ClientReview[]>([]);
+  readonly loyaltyActions = signal<LoyaltyActionResponse[]>([]);
+  readonly notifications = signal<ClientNotificationResponse[]>([]);
+  readonly products = signal<ProductResponse[]>([]);
+  readonly stockReport = signal<StockSnapshot[]>([]);
+  readonly salesProjection = signal<SalesProjection[]>([]);
+  readonly cashSession = signal<CashSessionResponse | null>(null);
+  readonly salesReport = signal<SalesReport | null>(null);
 
   readonly hasBarbers = computed(() => this.barbers().length > 0);
   readonly hasClients = computed(() => this.clients().length > 0);
   readonly hasAppointments = computed(() => this.appointments().length > 0);
+  readonly hasProducts = computed(() => this.products().length > 0);
   readonly summary = computed(() => ({
     barbers: this.barbers().length,
     clients: this.clients().length,
-    appointments: this.appointments().length
+    appointments: this.appointments().length,
+    products: this.products().length
   }));
   readonly selectedSucursal = computed(() => this.sucursales().find((s) => s.id === this.selectedSucursalId()));
   readonly scopedBarbers = computed(() => this.barbers().filter((b) => b.sucursalId === this.selectedSucursalId()));
@@ -130,6 +177,8 @@ export class AppComponent implements OnInit {
   requestSuccess = '';
   loadingCatalogs = false;
   loadingAppointments = false;
+  loadingInventory = false;
+  loadingPayments = false;
   submittingClient = false;
   submittingAppointment = false;
   clientResetKey = 0;
@@ -142,6 +191,9 @@ export class AppComponent implements OnInit {
     this.loadCatalogs();
     this.loadAppointments();
     this.loadPublicCatalog();
+    this.loadClientInsights();
+    this.loadInventory();
+    this.loadCashData();
   }
 
   loadCatalogs(): void {
@@ -149,7 +201,7 @@ export class AppComponent implements OnInit {
 
     forkJoin({
       barbers: this.http.get<BarberResponse[]>(`${this.apiBase}/barberos`),
-      clients: this.http.get<ClientResponse[]>(`${this.apiBase}/clientes`)
+      clients: this.http.get<ClientResponse[]>(`${this.clientApiBase}/clientes`)
     }).subscribe({
       next: ({ barbers, clients }) => {
         this.barbers.set(barbers);
@@ -196,6 +248,23 @@ export class AppComponent implements OnInit {
     this.selectedSucursalId.set(id);
   }
 
+  loadClientInsights(): void {
+    forkJoin({
+      segments: this.http.get<ClientSegment[]>(`${this.clientApiBase}/clientes/segmentos`),
+      reviews: this.http.get<ClientReview[]>(`${this.clientApiBase}/clientes/reseñas`),
+      loyalty: this.http.get<LoyaltyActionResponse[]>(`${this.clientApiBase}/clientes/fidelizacion/acciones`),
+      notifications: this.http.get<ClientNotificationResponse[]>(`${this.clientApiBase}/clientes/notificaciones`)
+    }).subscribe({
+      next: ({ segments, reviews, loyalty, notifications }) => {
+        this.segments.set(segments);
+        this.reviews.set(reviews);
+        this.loyaltyActions.set(loyalty);
+        this.notifications.set(notifications);
+      },
+      error: (err) => this.handleError('No se pudo cargar la inteligencia de clientes', err)
+    });
+  }
+
   registerClient(payload: ClientPayload): void {
     this.requestError = '';
     this.requestSuccess = '';
@@ -208,7 +277,7 @@ export class AppComponent implements OnInit {
 
     this.submittingClient = true;
 
-    this.http.post<ClientResponse>(`${this.apiBase}/clientes`, payload).subscribe({
+    this.http.post<ClientResponse>(`${this.clientApiBase}/clientes`, payload).subscribe({
       next: (client) => {
         this.clients.set([client, ...this.clients()]);
         this.requestSuccess = `Cliente ${client.name} registrado.`;
@@ -256,6 +325,105 @@ export class AppComponent implements OnInit {
 
   reserveFromCatalog(item: CatalogItem): void {
     this.requestSuccess = `${item.nombre} preparado para compra o agenda en ${this.selectedSucursal()?.nombre ?? ''}.`;
+  loadInventory(): void {
+    this.loadingInventory = true;
+    forkJoin({
+      products: this.http.get<ProductResponse[]>(`${this.apiV1}/inventario/productos`),
+      stock: this.http.get<StockSnapshot[]>(`${this.apiV1}/inventario/reportes/stock`),
+      sales: this.http.get<SalesProjection[]>(`${this.apiV1}/inventario/reportes/ventas`)
+    }).subscribe({
+      next: ({ products, stock, sales }) => {
+        this.products.set(products);
+        this.stockReport.set(stock);
+        this.salesProjection.set(sales);
+        this.loadingInventory = false;
+      },
+      error: (err) => {
+        this.loadingInventory = false;
+        this.handleError('No se pudo cargar inventario', err);
+      }
+    });
+  }
+
+  createProduct(payload: ProductPayload): void {
+    this.http.post<ProductResponse>(`${this.apiV1}/inventario/productos`, payload).subscribe({
+      next: (product) => {
+        this.products.set([product, ...this.products()]);
+        this.loadInventory();
+        this.requestSuccess = `Producto ${product.name} creado.`;
+      },
+      error: (err) => this.handleError('No se pudo crear el producto', err)
+    });
+  }
+
+  registerPurchase(payload: MovementPayload): void {
+    this.http.post(`${this.apiV1}/inventario/movimientos/compra`, payload).subscribe({
+      next: () => this.loadInventory(),
+      error: (err) => this.handleError('No se pudo registrar la compra', err)
+    });
+  }
+
+  registerSale(payload: MovementPayload): void {
+    this.http.post(`${this.apiV1}/inventario/movimientos/venta`, payload).subscribe({
+      next: () => this.loadInventory(),
+      error: (err) => this.handleError('No se pudo registrar la venta', err)
+    });
+  }
+
+  loadCashData(): void {
+    forkJoin({
+      session: this.http.get<CashSessionResponse | null>(`${this.apiV1}/caja/estado`),
+      report: this.http.get<SalesReport>(`${this.apiV1}/caja/reportes/ventas`)
+    }).subscribe({
+      next: ({ session, report }) => {
+        this.cashSession.set(session ? { ...session, open: session.closedAt === null } : null);
+        this.salesReport.set(report);
+      },
+      error: (err) => this.handleError('No se pudo cargar el estado de caja', err)
+    });
+  }
+
+  openCashRegister(amount: number): void {
+    this.loadingPayments = true;
+    this.http.post<CashSessionResponse>(`${this.apiV1}/caja/aperturas`, { openingAmount: amount }).subscribe({
+      next: (session) => {
+        this.cashSession.set({ ...session, open: true });
+        this.loadingPayments = false;
+      },
+      error: (err) => {
+        this.loadingPayments = false;
+        this.handleError('No se pudo abrir la caja', err);
+      }
+    });
+  }
+
+  closeCashRegister(amount: number): void {
+    this.loadingPayments = true;
+    this.http.post<CashSessionResponse>(`${this.apiV1}/caja/cierres`, { closingAmount: amount }).subscribe({
+      next: (session) => {
+        this.cashSession.set({ ...session, open: false });
+        this.loadingPayments = false;
+      },
+      error: (err) => {
+        this.loadingPayments = false;
+        this.handleError('No se pudo cerrar la caja', err);
+      }
+    });
+  }
+
+  registerPayment(payload: PaymentPayload): void {
+    this.loadingPayments = true;
+    this.http.post(`${this.apiV1}/caja/pagos`, payload).subscribe({
+      next: () => {
+        this.loadingPayments = false;
+        this.loadCashData();
+        this.requestSuccess = 'Pago registrado en POS.';
+      },
+      error: (err) => {
+        this.loadingPayments = false;
+        this.handleError('No se pudo registrar el pago', err);
+      }
+    });
   }
 
   private handleError(message: string, err: unknown): void {
