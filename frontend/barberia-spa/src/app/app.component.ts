@@ -15,10 +15,10 @@ import {
   ClientResponse,
   EndpointDescriptor,
   FeatureCard,
-  SucursalResponse
+  SucursalResponse,
   ClientSegment,
   ClientReview,
-  LoyaltyActionResponse
+  LoyaltyActionResponse,
   MovementPayload,
   PaymentPayload,
   ProductPayload,
@@ -58,10 +58,10 @@ import { SalesViewComponent } from './features/sales-view/sales-view.component';
     FeatureMapComponent,
     BranchSelectorComponent,
     BrandingPreviewComponent,
-    CatalogShowcaseComponent
+    CatalogShowcaseComponent,
     ClientCampaignsComponent,
     ClientCohortsComponent,
-    ClientReviewsComponent
+    ClientReviewsComponent,
     InventoryViewComponent,
     SalesViewComponent
   ],
@@ -126,13 +126,12 @@ export class AppComponent implements OnInit {
     { path: '/api/barberos', description: 'Catálogo base de barberos' },
     { path: '/api/clientes', description: 'Registro y listado de clientes' },
     { path: '/api/v1/sucursales', description: 'Contexto multi-sucursal y branding' },
-    { path: '/api/v1/catalogo', description: 'Catálogo público para vitrina online' }
+    { path: '/api/v1/catalogo', description: 'Catálogo público para vitrina online' },
     { path: '/api/v1/clientes', description: 'Registro, ciclo de vida y catálogo de clientes' },
     { path: '/api/v1/clientes/segmentos', description: 'Segmentación con recordatorios (POST, GET)' },
     { path: '/api/v1/clientes/reseñas', description: 'Registro y lectura de reseñas vinculadas a cohortes' },
     { path: '/api/v1/clientes/fidelizacion/acciones', description: 'Acreditación de puntos, notas y recordatorios' },
-    { path: '/api/v1/clientes/notificaciones', description: 'Gestión de notificaciones y recordatorios a clientes' }
-    { path: '/api/clientes', description: 'Registro y listado de clientes' },
+    { path: '/api/v1/clientes/notificaciones', description: 'Gestión de notificaciones y recordatorios a clientes' },
     { path: '/api/v1/inventario', description: 'Productos, compras/ventas y reportes de stock' },
     { path: '/api/v1/caja', description: 'Apertura/cierre de caja, pagos POS y reportes de ventas' }
   ];
@@ -325,6 +324,8 @@ export class AppComponent implements OnInit {
 
   reserveFromCatalog(item: CatalogItem): void {
     this.requestSuccess = `${item.nombre} preparado para compra o agenda en ${this.selectedSucursal()?.nombre ?? ''}.`;
+  }
+
   loadInventory(): void {
     this.loadingInventory = true;
     forkJoin({

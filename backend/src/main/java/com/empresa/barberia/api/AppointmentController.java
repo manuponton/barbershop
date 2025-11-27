@@ -8,9 +8,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/citas")
@@ -29,13 +32,16 @@ public class AppointmentController {
                         request.barberName(),
                         request.service(),
                         request.startAt(),
-                        request.durationMinutes()
+                        request.durationMinutes(),
+                        request.sucursalId()
                 )
                 .map(AppointmentResponse::from);
     }
 
     @GetMapping
-    public Flux<AppointmentResponse> list() {
-        return appointmentService.listAppointments().map(AppointmentResponse::from);
+    public Flux<AppointmentResponse> list(@RequestParam(required = false) String barberId,
+                                          @RequestParam(required = false) LocalDateTime start,
+                                          @RequestParam(required = false) LocalDateTime end) {
+        return appointmentService.listByFilters(barberId, start, end).map(AppointmentResponse::from);
     }
 }
