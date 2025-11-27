@@ -8,9 +8,13 @@ import {
   AppointmentResponse,
   BarberResponse,
   ClientPayload,
+  ClientNotificationResponse,
   ClientResponse,
   EndpointDescriptor,
-  FeatureCard
+  FeatureCard,
+  ClientSegment,
+  ClientReview,
+  LoyaltyActionResponse
 } from './models';
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
 import { MetricsGridComponent } from './components/metrics-grid/metrics-grid.component';
@@ -19,6 +23,9 @@ import { AppointmentFormComponent } from './components/appointment-form/appointm
 import { CatalogPanelComponent } from './components/catalog-panel/catalog-panel.component';
 import { EndpointsListComponent } from './components/endpoints-list/endpoints-list.component';
 import { FeatureMapComponent } from './components/feature-map/feature-map.component';
+import { ClientCampaignsComponent } from './features/clientes/client-campaigns/client-campaigns.component';
+import { ClientCohortsComponent } from './features/clientes/client-cohorts/client-cohorts.component';
+import { ClientReviewsComponent } from './features/clientes/client-reviews/client-reviews.component';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +39,10 @@ import { FeatureMapComponent } from './components/feature-map/feature-map.compon
     AppointmentFormComponent,
     CatalogPanelComponent,
     EndpointsListComponent,
-    FeatureMapComponent
+    FeatureMapComponent,
+    ClientCampaignsComponent,
+    ClientCohortsComponent,
+    ClientReviewsComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -40,6 +50,7 @@ import { FeatureMapComponent } from './components/feature-map/feature-map.compon
 export class AppComponent implements OnInit {
   readonly title = 'Barbería SaaS';
   readonly apiBase = '/api';
+  readonly clientApiBase = '/api/v1';
 
   readonly featureMatrix: FeatureCard[] = [
     {
@@ -60,9 +71,13 @@ export class AppComponent implements OnInit {
     },
     {
       context: 'Clientes',
-      description: 'Registra y consulta clientes con validaciones en el frontend.',
+      description: 'Registra, segmenta y coordina campañas de clientes.',
       status: 'online',
-      actions: ['Validación de email y nombre', 'Reset de formulario con mensajes', 'Selección directa en agenda de citas']
+      actions: [
+        'Validación de email y nombre',
+        'Segmentación con recordatorios',
+        'Reseñas vinculadas a campañas y cohortes'
+      ]
     },
     {
       context: 'Inventario',
@@ -87,12 +102,19 @@ export class AppComponent implements OnInit {
   readonly endpoints: EndpointDescriptor[] = [
     { path: '/api/citas', description: 'Crear y consultar citas (POST, GET)' },
     { path: '/api/barberos', description: 'Catálogo base de barberos' },
-    { path: '/api/clientes', description: 'Registro y listado de clientes' }
+    { path: '/api/v1/clientes', description: 'Registro, ciclo de vida y catálogo de clientes' },
+    { path: '/api/v1/clientes/segmentos', description: 'Segmentación con recordatorios (POST, GET)' },
+    { path: '/api/v1/clientes/reseñas', description: 'Registro y lectura de reseñas vinculadas a cohortes' },
+    { path: '/api/v1/clientes/fidelizacion/acciones', description: 'Acreditación de puntos, notas y recordatorios' }
   ];
 
   readonly barbers = signal<BarberResponse[]>([]);
   readonly clients = signal<ClientResponse[]>([]);
   readonly appointments = signal<AppointmentResponse[]>([]);
+  readonly segments = signal<ClientSegment[]>([]);
+  readonly reviews = signal<ClientReview[]>([]);
+  readonly loyaltyActions = signal<LoyaltyActionResponse[]>([]);
+  readonly notifications = signal<ClientNotificationResponse[]>([]);
 
   readonly hasBarbers = computed(() => this.barbers().length > 0);
   readonly hasClients = computed(() => this.clients().length > 0);
@@ -120,6 +142,7 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.loadCatalogs();
     this.loadAppointments();
+    this.loadClientInsights();
   }
 
   loadCatalogs(): void {
@@ -127,7 +150,7 @@ export class AppComponent implements OnInit {
 
     forkJoin({
       barbers: this.http.get<BarberResponse[]>(`${this.apiBase}/barberos`),
-      clients: this.http.get<ClientResponse[]>(`${this.apiBase}/clientes`)
+      clients: this.http.get<ClientResponse[]>(`${this.clientApiBase}/clientes`)
     }).subscribe({
       next: ({ barbers, clients }) => {
         this.barbers.set(barbers);
@@ -151,6 +174,23 @@ export class AppComponent implements OnInit {
     });
   }
 
+  loadClientInsights(): void {
+    forkJoin({
+      segments: this.http.get<ClientSegment[]>(`${this.clientApiBase}/clientes/segmentos`),
+      reviews: this.http.get<ClientReview[]>(`${this.clientApiBase}/clientes/reseñas`),
+      loyalty: this.http.get<LoyaltyActionResponse[]>(`${this.clientApiBase}/clientes/fidelizacion/acciones`),
+      notifications: this.http.get<ClientNotificationResponse[]>(`${this.clientApiBase}/clientes/notificaciones`)
+    }).subscribe({
+      next: ({ segments, reviews, loyalty, notifications }) => {
+        this.segments.set(segments);
+        this.reviews.set(reviews);
+        this.loyaltyActions.set(loyalty);
+        this.notifications.set(notifications);
+      },
+      error: (err) => this.handleError('No se pudo cargar la inteligencia de clientes', err)
+    });
+  }
+
   registerClient(payload: ClientPayload): void {
     this.requestError = '';
     this.requestSuccess = '';
@@ -161,7 +201,7 @@ export class AppComponent implements OnInit {
 
     this.submittingClient = true;
 
-    this.http.post<ClientResponse>(`${this.apiBase}/clientes`, payload).subscribe({
+    this.http.post<ClientResponse>(`${this.clientApiBase}/clientes`, payload).subscribe({
       next: (client) => {
         this.clients.set([client, ...this.clients()]);
         this.requestSuccess = `Cliente ${client.name} registrado.`;

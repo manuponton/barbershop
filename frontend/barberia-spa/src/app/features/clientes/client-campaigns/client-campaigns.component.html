@@ -1,0 +1,44 @@
+<section class="card data-card">
+  <header class="data-header">
+    <div>
+      <p class="eyebrow">Segmentos y campañas</p>
+      <h2>Activaciones y recordatorios</h2>
+      <p class="hint">Segmentos activos con notas de seguimiento y recordatorios programados.</p>
+    </div>
+    <span class="status active">Orquestador activo</span>
+  </header>
+
+  <div class="list-grid">
+    <div>
+      <h3>Segmentos creados</h3>
+      <ul class="list" *ngIf="segments.length; else emptySegments">
+        <li *ngFor="let segment of segments">
+          <div>
+            <strong>{{ segment.segment }}</strong>
+            <small>{{ segment.criteria || 'Criterio en curso' }}</small>
+          </div>
+          <small>{{ segment.segmentedAt | date: 'short' }}</small>
+        </li>
+      </ul>
+      <ng-template #emptySegments>
+        <p class="hint">Sin segmentos creados aún.</p>
+      </ng-template>
+    </div>
+
+    <div>
+      <h3>Recordatorios y notificaciones</h3>
+      <ul class="list" *ngIf="notifications.length; else emptyNotifications">
+        <li *ngFor="let notification of notifications">
+          <div>
+            <strong>{{ notification.category | titlecase }}</strong>
+            <small>{{ notification.message }}</small>
+          </div>
+          <small>{{ notification.scheduledAt | date: 'short' }}</small>
+        </li>
+      </ul>
+      <ng-template #emptyNotifications>
+        <p class="hint">Aún no hay recordatorios pendientes.</p>
+      </ng-template>
+    </div>
+  </div>
+</section>

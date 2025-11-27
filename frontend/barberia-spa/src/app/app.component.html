@@ -29,6 +29,21 @@
     (refreshAppointments)="loadAppointments()"
   ></app-catalog-panel>
 
+  <section class="grid actions">
+    <app-client-campaigns
+      [segments]="segments()"
+      [notifications]="notifications()"
+    ></app-client-campaigns>
+
+    <app-client-cohorts [clients]="clients()" [segments]="segments()"></app-client-cohorts>
+
+    <app-client-reviews
+      [reviews]="reviews()"
+      [loyaltyActions]="loyaltyActions()"
+      [notifications]="notifications()"
+    ></app-client-reviews>
+  </section>
+
   <app-endpoints-list [endpoints]="endpoints"></app-endpoints-list>
 
   <app-feature-map [features]="featureMatrix"></app-feature-map>
