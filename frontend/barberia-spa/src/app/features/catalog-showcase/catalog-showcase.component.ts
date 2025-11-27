@@ -7,7 +7,7 @@ import { CatalogItem, CatalogoResponse } from '../../models';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './catalog-showcase.component.html',
-  styleUrl: './catalog-showcase.component.scss'
+  styleUrls: ['./catalog-showcase.component.scss']
 })
 export class CatalogShowcaseComponent {
   @Input() catalogos: CatalogoResponse[] = [];

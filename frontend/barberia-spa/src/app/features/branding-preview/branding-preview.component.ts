@@ -7,7 +7,7 @@ import { BrandingConfig, SucursalResponse } from '../../models';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './branding-preview.component.html',
-  styleUrl: './branding-preview.component.scss'
+  styleUrls: ['./branding-preview.component.scss']
 })
 export class BrandingPreviewComponent {
   @Input() branch?: SucursalResponse;

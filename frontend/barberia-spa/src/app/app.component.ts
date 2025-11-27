@@ -44,7 +44,7 @@ import { CatalogShowcaseComponent } from './features/catalog-showcase/catalog-sh
     CatalogShowcaseComponent
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
   readonly title = 'Barbería SaaS';

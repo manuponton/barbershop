@@ -7,7 +7,7 @@ import { SucursalResponse } from '../../models';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './branch-selector.component.html',
-  styleUrl: './branch-selector.component.scss'
+  styleUrls: ['./branch-selector.component.scss']
 })
 export class BranchSelectorComponent {
   @Input() branches: SucursalResponse[] = [];
