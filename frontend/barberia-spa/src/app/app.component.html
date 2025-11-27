@@ -29,6 +29,27 @@
     (refreshAppointments)="loadAppointments()"
   ></app-catalog-panel>
 
+  <app-inventory-view
+    [products]="products()"
+    [stockReport]="stockReport()"
+    [salesReport]="salesProjection()"
+    [submitting]="loadingInventory"
+    (refreshInventory)="loadInventory()"
+    (createProduct)="createProduct($event)"
+    (registerPurchase)="registerPurchase($event)"
+    (registerSale)="registerSale($event)"
+  ></app-inventory-view>
+
+  <app-sales-view
+    [session]="cashSession()"
+    [salesReport]="salesReport()"
+    [processing]="loadingPayments"
+    (openCash)="openCashRegister($event)"
+    (closeCash)="closeCashRegister($event)"
+    (sendPayment)="registerPayment($event)"
+    (refreshSales)="loadCashData()"
+  ></app-sales-view>
+
   <app-endpoints-list [endpoints]="endpoints"></app-endpoints-list>
 
   <app-feature-map [features]="featureMatrix"></app-feature-map>
