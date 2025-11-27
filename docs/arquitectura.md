@@ -148,3 +148,9 @@ Los siguientes temas deben incorporarse de manera explícita en los contextos y 
 - Aplicar principios SOLID, Clean Code, inyección de dependencias, API versionada y seguridad desde el diseño.
 - Arquitectura hexagonal: dominio independiente de infraestructura; adaptadores de entrada/salida intercambiables.
 - Automatizar CI/CD con pruebas, análisis estático, empaquetado y despliegue.
+
+## 10. Extensión hacia funcionalidades avanzadas
+- **Recomendaciones y personalización**: el contexto de Clientes deberá exponer un historial consolidado de servicios y compras para alimentar un servicio de recomendaciones desacoplado (puerto `RecommendationEngine`) que entregue sugerencias a Citas y POS.
+- **Depósitos y penalizaciones**: el agregado Cita incorporará campos para depósito y reglas de cancelación/no-show, con eventos `DepositoRegistrado` y `PenalizacionAplicada` consumidos por Caja.
+- **Fidelización y cupones**: Caja y Clientes compartirán un puerto de `Promotions` para aplicar cupones/puntos sobre ventas; los objetos de valor `Cupon` y `SaldoPuntos` se mantendrán en Clientes y se validarán en Caja.
+- **E-commerce y multicanal**: Inventario servirá como fuente de verdad para un catálogo público y los pedidos online se mapearán a comandos `CrearOrdenOnline` en Caja, reutilizando el mismo flujo de venta y ajuste de stock.
