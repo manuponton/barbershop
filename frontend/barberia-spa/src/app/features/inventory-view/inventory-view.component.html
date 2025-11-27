@@ -1,0 +1,105 @@
+<section class="panel">
+  <header class="panel__header">
+    <div>
+      <p class="eyebrow">Inventario y stock</p>
+      <h2>Productos listos para POS</h2>
+    </div>
+    <button type="button" class="link" (click)="refreshInventory.emit()">Refrescar catálogos</button>
+  </header>
+
+  <div class="grid">
+    <form class="card" (ngSubmit)="submitProduct()" #productFormRef="ngForm">
+      <p class="eyebrow">Crear producto</p>
+      <label>
+        Nombre
+        <input name="name" [(ngModel)]="productForm.name" required />
+      </label>
+      <label>
+        Categoría
+        <input name="category" [(ngModel)]="productForm.category" />
+      </label>
+      <label>
+        Precio
+        <input type="number" name="price" [(ngModel)]="productForm.price" required min="0" step="0.01" />
+      </label>
+      <label>
+        Stock inicial
+        <input type="number" name="stock" [(ngModel)]="productForm.stock" min="0" />
+      </label>
+      <button type="submit" [disabled]="submitting || productFormRef.invalid">Crear producto</button>
+    </form>
+
+    <form class="card" (ngSubmit)="submitPurchase()" #movementForm="ngForm">
+      <p class="eyebrow">Movimiento de stock</p>
+      <label>
+        Producto
+        <select name="productId" [(ngModel)]="movement.productId" required>
+          <option value="" disabled>Selecciona un producto</option>
+          <option *ngFor="let product of products" [value]="product.id">{{ product.name }}</option>
+        </select>
+      </label>
+      <label>
+        Cantidad
+        <input type="number" name="quantity" [(ngModel)]="movement.quantity" min="1" required />
+      </label>
+      <label>
+        Precio unitario
+        <input type="number" name="unitPrice" [(ngModel)]="movement.unitPrice" min="0" step="0.01" />
+      </label>
+      <label>
+        Nota
+        <input name="note" [(ngModel)]="movement.note" />
+      </label>
+      <div class="actions">
+        <button type="submit" [disabled]="movementForm.invalid || submitting">Registrar compra</button>
+        <button type="button" class="secondary" [disabled]="movementForm.invalid || submitting" (click)="submitSale()">
+          Registrar venta
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="grid">
+    <article class="card">
+      <p class="eyebrow">Stock disponible</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Stock</th>
+            <th>Precio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of stockReport">
+            <td>{{ item.name }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.stock }}</td>
+            <td>{{ item.unitPrice | currency:'USD' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="card">
+      <p class="eyebrow">Ventas por producto</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let sale of salesReport">
+            <td>{{ sale.productName }}</td>
+            <td>{{ sale.quantitySold }}</td>
+            <td>{{ sale.totalAmount | currency:'USD' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+</section>

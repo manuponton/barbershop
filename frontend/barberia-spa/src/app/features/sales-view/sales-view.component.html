@@ -1,0 +1,82 @@
+<section class="panel">
+  <header class="panel__header">
+    <div>
+      <p class="eyebrow">Caja y POS</p>
+      <h2>Pagos y arqueo diario</h2>
+    </div>
+    <button type="button" class="link" (click)="refreshSales.emit()">Actualizar reportes</button>
+  </header>
+
+  <div class="grid">
+    <form class="card" (ngSubmit)="submitOpen()">
+      <p class="eyebrow">Apertura de caja</p>
+      <label>
+        Monto inicial
+        <input type="number" [(ngModel)]="openingAmount" name="openingAmount" min="0" />
+      </label>
+      <button type="submit" [disabled]="processing || (session?.open ?? false)">Abrir caja</button>
+    </form>
+
+    <form class="card" (ngSubmit)="submitClose()">
+      <p class="eyebrow">Cierre de caja</p>
+      <label>
+        Monto cierre
+        <input type="number" [(ngModel)]="closingAmount" name="closingAmount" min="0" />
+      </label>
+      <button type="submit" [disabled]="processing || !(session?.open ?? false)">Cerrar caja</button>
+    </form>
+
+    <form class="card" (ngSubmit)="submitPayment()">
+      <p class="eyebrow">Registrar pago</p>
+      <label>
+        Descripción
+        <input name="description" [(ngModel)]="payment.description" required />
+      </label>
+      <label>
+        Monto
+        <input type="number" name="amount" [(ngModel)]="payment.amount" required min="0" step="0.01" />
+      </label>
+      <label>
+        Método
+        <select name="method" [(ngModel)]="payment.method">
+          <option *ngFor="let method of methods" [value]="method">{{ method }}</option>
+        </select>
+      </label>
+      <button type="submit" [disabled]="processing || !(session?.open ?? false)">Registrar pago</button>
+    </form>
+  </div>
+
+  <article class="card">
+    <p class="eyebrow">Resumen</p>
+    <div class="summary">
+      <div>
+        <p class="label">Estado de caja</p>
+        <strong>{{ (session?.open ?? false) ? 'Abierta' : 'Cerrada' }}</strong>
+        <p class="meta">Apertura: {{ session?.openedAt || 'Pendiente' }}</p>
+      </div>
+      <div>
+        <p class="label">Total ventas</p>
+        <strong>{{ salesReport?.totalAmount || 0 | currency:'USD' }}</strong>
+        <p class="meta">Aprobados: {{ salesReport?.approvedCount || 0 }} • Rechazados: {{ salesReport?.declinedCount || 0 }}</p>
+      </div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Descripción</th>
+          <th>Método</th>
+          <th>Monto</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let payment of salesReport?.payments">
+          <td>{{ payment.description }}</td>
+          <td>{{ payment.method }}</td>
+          <td>{{ payment.amount | currency:'USD' }}</td>
+          <td>{{ payment.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </article>
+</section>
