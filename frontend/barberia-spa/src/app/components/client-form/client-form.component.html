@@ -1,0 +1,25 @@
+<article class="card form-card">
+  <header>
+    <p class="eyebrow">Clientes</p>
+    <h2>Registrar cliente</h2>
+  </header>
+  <form class="form" [formGroup]="clientForm" (ngSubmit)="onSubmit()">
+    <label>
+      Nombre
+      <input type="text" formControlName="name" placeholder="María López" />
+      <span class="hint" *ngIf="clientForm.controls.name.invalid && clientForm.controls.name.touched">Nombre requerido</span>
+    </label>
+    <label>
+      Email
+      <input type="email" formControlName="email" placeholder="correo@dominio.com" />
+      <span class="hint" *ngIf="clientForm.controls.email.invalid && clientForm.controls.email.touched">Email válido</span>
+    </label>
+    <label>
+      Cumpleaños
+      <input type="date" formControlName="birthday" />
+    </label>
+    <button class="btn" type="submit" [disabled]="submitting">
+      {{ submitting ? 'Guardando...' : 'Guardar cliente' }}
+    </button>
+  </form>
+</article>

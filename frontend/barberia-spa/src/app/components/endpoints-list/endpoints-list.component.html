@@ -1,0 +1,12 @@
+<section class="card endpoints">
+  <header>
+    <p class="eyebrow">Adaptadores expuestos</p>
+    <h2>Endpoints iniciales</h2>
+  </header>
+  <ul>
+    <li *ngFor="let endpoint of endpoints">
+      <code>{{ endpoint.path }}</code>
+      <span>{{ endpoint.description }}</span>
+    </li>
+  </ul>
+</section>

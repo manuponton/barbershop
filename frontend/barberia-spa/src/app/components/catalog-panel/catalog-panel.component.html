@@ -1,0 +1,40 @@
+<section class="card data-card">
+  <header class="data-header">
+    <div>
+      <p class="eyebrow">Contextos activos</p>
+      <h2>Catálogos y citas en vivo</h2>
+    </div>
+    <div class="actions-inline">
+      <button class="btn ghost" type="button" (click)="refreshCatalogs.emit()">Refrescar catálogos</button>
+      <button class="btn ghost" type="button" (click)="refreshAppointments.emit()">Refrescar citas</button>
+    </div>
+  </header>
+
+  <div class="list-grid">
+    <div>
+      <h3>Barberos disponibles</h3>
+      <p class="hint" *ngIf="loadingCatalogs">Cargando catálogos...</p>
+      <ul class="list" *ngIf="barbers.length; else emptyBarbers">
+        <li *ngFor="let barber of barbers">
+          <strong>{{ barber.name }}</strong>
+          <small>{{ barber.services.join(', ') }}</small>
+        </li>
+      </ul>
+      <ng-template #emptyBarbers><p class="hint">Sin barberos cargados.</p></ng-template>
+    </div>
+
+    <div>
+      <h3>Clientes registrados</h3>
+      <p class="hint" *ngIf="loadingCatalogs">Cargando catálogos...</p>
+      <ul class="list" *ngIf="clients.length; else emptyClients">
+        <li *ngFor="let client of clients">
+          <strong>{{ client.name }}</strong>
+          <small>{{ client.email }}</small>
+        </li>
+      </ul>
+      <ng-template #emptyClients><p class="hint">Aún no hay clientes.</p></ng-template>
+    </div>
+  </div>
+
+  <app-appointments-table [appointments]="appointments" [loading]="loadingAppointments"></app-appointments-table>
+</section>
