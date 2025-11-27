@@ -105,7 +105,8 @@ export class AppComponent implements OnInit {
     { path: '/api/v1/clientes', description: 'Registro, ciclo de vida y catálogo de clientes' },
     { path: '/api/v1/clientes/segmentos', description: 'Segmentación con recordatorios (POST, GET)' },
     { path: '/api/v1/clientes/reseñas', description: 'Registro y lectura de reseñas vinculadas a cohortes' },
-    { path: '/api/v1/clientes/fidelizacion/acciones', description: 'Acreditación de puntos, notas y recordatorios' }
+    { path: '/api/v1/clientes/fidelizacion/acciones', description: 'Acreditación de puntos, notas y recordatorios' },
+    { path: '/api/v1/clientes/notificaciones', description: 'Gestión de notificaciones y recordatorios a clientes' }
   ];
 
   readonly barbers = signal<BarberResponse[]>([]);
