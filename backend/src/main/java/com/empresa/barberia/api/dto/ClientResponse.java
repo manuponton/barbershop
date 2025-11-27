@@ -4,8 +4,18 @@ import com.empresa.barberia.domain.Client;
 
 import java.time.LocalDate;
 
-public record ClientResponse(String id, String name, String email, LocalDate birthday) {
+public record ClientResponse(String id, String name, String email, LocalDate birthday, String sucursalId, String lifecycleStatus, String loyaltyProgram, int loyaltyPoints, String loyaltyTier) {
     public static ClientResponse from(Client client) {
-        return new ClientResponse(client.id(), client.name(), client.email(), client.birthday());
+        return new ClientResponse(
+                client.id(),
+                client.name(),
+                client.email(),
+                client.birthday(),
+                client.sucursalId(),
+                client.lifecycleStatus(),
+                client.loyaltyProgram(),
+                client.loyaltyPoints(),
+                client.loyaltyTier()
+        );
     }
 }

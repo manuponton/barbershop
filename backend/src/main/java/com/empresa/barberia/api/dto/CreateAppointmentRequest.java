@@ -13,6 +13,7 @@ public record CreateAppointmentRequest(
         @NotBlank(message = "El servicio es requerido") String service,
         @NotNull(message = "La fecha de inicio es requerida")
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime startAt,
-        @Min(value = 10, message = "La duración mínima es de 10 minutos") int durationMinutes
+        @Min(value = 10, message = "La duración mínima es de 10 minutos") int durationMinutes,
+        String sucursalId
 ) {
 }

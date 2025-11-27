@@ -16,8 +16,18 @@ public class ClientRepository {
 
     private final Map<String, Client> clients = new ConcurrentHashMap<>();
 
-    public Mono<Client> save(String name, String email, LocalDate birthday) {
-        var client = new Client(UUID.randomUUID().toString(), name, email, birthday);
+    public Mono<Client> save(String name, String email, LocalDate birthday, String sucursalId) {
+        var client = new Client(
+                UUID.randomUUID().toString(),
+                name,
+                email,
+                birthday,
+                sucursalId != null ? sucursalId : "central",
+                "ACTIVE",
+                "BASE",
+                0,
+                "BRONCE"
+        );
         clients.put(client.id(), client);
         return Mono.just(client);
     }
@@ -31,5 +41,11 @@ public class ClientRepository {
         return clients.values().stream()
                 .filter(client -> client.name().equalsIgnoreCase(name))
                 .findFirst();
+    }
+
+    public Flux<Client> findBySucursal(String sucursalId) {
+        return Flux.fromIterable(clients.values())
+                .filter(client -> sucursalId == null || client.sucursalId().equals(sucursalId))
+                .sort((a, b) -> a.name().compareToIgnoreCase(b.name()));
     }
 }

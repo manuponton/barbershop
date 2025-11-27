@@ -13,6 +13,7 @@ public record CreateClientRequest(
         @Email(message = "Email inválido") @NotBlank(message = "El email es requerido") String email,
         @NotNull(message = "La fecha de cumpleaños es requerida")
         @Past(message = "La fecha debe estar en el pasado")
-        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthday
+        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthday,
+        String sucursalId
 ) {
 }

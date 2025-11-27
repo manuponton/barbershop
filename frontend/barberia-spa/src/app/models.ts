@@ -24,6 +24,7 @@ export interface AppointmentResponse {
   service: string;
   startAt: string;
   durationMinutes: number;
+  status: string;
   sucursalId: string;
 }
 
@@ -133,6 +134,7 @@ export interface ClientNotificationResponse {
   message: string;
   scheduledAt: string;
   delivered: boolean;
+}
 export interface ProductResponse {
   id: string;
   name: string;
@@ -147,6 +149,7 @@ export interface StockSnapshot {
   stock: number;
   unitPrice: number;
   category: string;
+  bajoMinimo?: boolean;
 }
 
 export interface SalesProjection {

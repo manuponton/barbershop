@@ -10,7 +10,9 @@ public record AppointmentResponse(
         String barberName,
         String service,
         LocalDateTime startAt,
-        int durationMinutes
+        int durationMinutes,
+        String status,
+        String sucursalId
 ) {
     public static AppointmentResponse from(Appointment appointment) {
         return new AppointmentResponse(
@@ -19,7 +21,9 @@ public record AppointmentResponse(
                 appointment.barberName(),
                 appointment.service(),
                 appointment.startAt(),
-                appointment.durationMinutes()
+                appointment.durationMinutes(),
+                appointment.status(),
+                appointment.sucursalId()
         );
     }
 }

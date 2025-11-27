@@ -24,7 +24,7 @@ public class ClientController {
 
     @PostMapping
     public Mono<ClientResponse> create(@Valid @RequestBody CreateClientRequest request) {
-        return clientRepository.save(request.name(), request.email(), request.birthday())
+        return clientRepository.save(request.name(), request.email(), request.birthday(), request.sucursalId())
                 .map(ClientResponse::from);
     }
 

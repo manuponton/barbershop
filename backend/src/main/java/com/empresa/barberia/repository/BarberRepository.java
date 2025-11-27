@@ -12,9 +12,9 @@ import java.util.UUID;
 public class BarberRepository {
 
     private final List<Barber> barbers = List.of(
-            new Barber(UUID.randomUUID().toString(), "Diego Cruz", List.of("Corte fade", "Barba y bigote", "Color")),
-            new Barber(UUID.randomUUID().toString(), "Mariana Torres", List.of("Corte clásico", "Cejas", "Tratamientos")),
-            new Barber(UUID.randomUUID().toString(), "Luis Herrera", List.of("Barbería premium", "Diseños", "Perfilado"))
+            new Barber(UUID.randomUUID().toString(), "Diego Cruz", "central", List.of("Corte fade", "Barba y bigote", "Color")),
+            new Barber(UUID.randomUUID().toString(), "Mariana Torres", "central", List.of("Corte clásico", "Cejas", "Tratamientos")),
+            new Barber(UUID.randomUUID().toString(), "Luis Herrera", "norte", List.of("Barbería premium", "Diseños", "Perfilado"))
     );
 
     public Flux<Barber> findAll() {
