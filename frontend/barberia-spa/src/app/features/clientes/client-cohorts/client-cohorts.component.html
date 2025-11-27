@@ -1,0 +1,22 @@
+<section class="card data-card">
+  <header class="data-header">
+    <div>
+      <p class="eyebrow">Seguimiento de cohortes</p>
+      <h2>Estados del ciclo de vida</h2>
+      <p class="hint">Distribución rápida de clientes por etapa y cohortes basadas en segmentos activos.</p>
+    </div>
+    <span class="status">Tracking</span>
+  </header>
+
+  <div class="grid metrics">
+    <div class="metric" *ngFor="let cohort of cohorts()">
+      <p class="eyebrow">{{ cohort.name }}</p>
+      <h2>{{ cohort.count }}</h2>
+      <p class="hint">{{ cohort.highlight }}</p>
+    </div>
+  </div>
+
+  <div *ngIf="hasSegments()" class="hint">
+    {{ segments.length }} segmento(s) alimentan las cohortes y recordatorios preventivos.
+  </div>
+</section>

@@ -9,6 +9,10 @@ export interface ClientResponse {
   name: string;
   email: string;
   birthday: string;
+  lifecycleStatus: string;
+  loyaltyProgram: string;
+  loyaltyPoints: number;
+  loyaltyTier: string;
 }
 
 export interface AppointmentResponse {
@@ -46,6 +50,45 @@ export interface AppointmentPayload {
   duration: number;
 }
 
+export interface ClientSegment {
+  id: string;
+  clientId: string;
+  segment: string;
+  criteria: string;
+  segmentedAt: string;
+  nextReminderAt?: string;
+  reminderNote?: string;
+}
+
+export interface ClientReview {
+  id: string;
+  clientId: string;
+  rating: number;
+  comment: string;
+  channel: string;
+  createdAt: string;
+  followUpAt?: string;
+}
+
+export interface LoyaltyActionResponse {
+  id: string;
+  clientId: string;
+  program: string;
+  reason: string;
+  points: number;
+  tier: string;
+  appliedAt: string;
+  reminderAt?: string;
+  reminderMessage?: string;
+}
+
+export interface ClientNotificationResponse {
+  id: string;
+  clientId: string;
+  category: string;
+  message: string;
+  scheduledAt: string;
+  delivered: boolean;
 export interface ProductResponse {
   id: string;
   name: string;
