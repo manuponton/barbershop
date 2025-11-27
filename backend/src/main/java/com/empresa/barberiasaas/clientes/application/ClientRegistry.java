@@ -31,6 +31,11 @@ import java.util.UUID;
 public class ClientRegistry {
 
     private final List<Client> clients = new ArrayList<>();
+    private final List<ClientSegment> segments = new ArrayList<>();
+    private final List<ClientReview> reviews = new ArrayList<>();
+    private final List<LoyaltyAction> loyaltyActions = new ArrayList<>();
+    private final List<ClientNotification> notifications = new ArrayList<>();
+    private final List<DomainEvent> events = new ArrayList<>();
     private final SucursalDirectory sucursalDirectory;
 
     public ClientRegistry(SucursalDirectory sucursalDirectory) {
@@ -41,14 +46,6 @@ public class ClientRegistry {
         sucursalDirectory.byId(sucursalId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sucursal no encontrada"));
 
-        Client client = new Client(UUID.randomUUID(), sucursalId, name, email, birthday);
-    private final List<ClientSegment> segments = new ArrayList<>();
-    private final List<ClientReview> reviews = new ArrayList<>();
-    private final List<LoyaltyAction> loyaltyActions = new ArrayList<>();
-    private final List<ClientNotification> notifications = new ArrayList<>();
-    private final List<DomainEvent> events = new ArrayList<>();
-
-    public Client register(@NotBlank String name, @Email String email, @Past LocalDate birthday) {
         Client client = new Client(
                 UUID.randomUUID(),
                 name,
