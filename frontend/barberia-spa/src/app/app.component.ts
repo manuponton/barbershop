@@ -7,6 +7,7 @@ import {
   AppointmentPayload,
   AppointmentResponse,
   BarberResponse,
+  CashSessionResponse,
   ClientPayload,
   ClientNotificationResponse,
   ClientResponse,
@@ -15,6 +16,13 @@ import {
   ClientSegment,
   ClientReview,
   LoyaltyActionResponse
+  MovementPayload,
+  PaymentPayload,
+  ProductPayload,
+  ProductResponse,
+  SalesProjection,
+  SalesReport,
+  StockSnapshot
 } from './models';
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
 import { MetricsGridComponent } from './components/metrics-grid/metrics-grid.component';
@@ -26,6 +34,8 @@ import { FeatureMapComponent } from './components/feature-map/feature-map.compon
 import { ClientCampaignsComponent } from './features/clientes/client-campaigns/client-campaigns.component';
 import { ClientCohortsComponent } from './features/clientes/client-cohorts/client-cohorts.component';
 import { ClientReviewsComponent } from './features/clientes/client-reviews/client-reviews.component';
+import { InventoryViewComponent } from './features/inventory-view/inventory-view.component';
+import { SalesViewComponent } from './features/sales-view/sales-view.component';
 
 @Component({
   selector: 'app-root',
@@ -43,6 +53,8 @@ import { ClientReviewsComponent } from './features/clientes/client-reviews/clien
     ClientCampaignsComponent,
     ClientCohortsComponent,
     ClientReviewsComponent
+    InventoryViewComponent,
+    SalesViewComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -51,6 +63,7 @@ export class AppComponent implements OnInit {
   readonly title = 'Barbería SaaS';
   readonly apiBase = '/api';
   readonly clientApiBase = '/api/v1';
+  readonly apiV1 = '/api/v1';
 
   readonly featureMatrix: FeatureCard[] = [
     {
@@ -81,15 +94,15 @@ export class AppComponent implements OnInit {
     },
     {
       context: 'Inventario',
-      description: 'Catálogo de productos y control de stock planificado para iteración siguiente.',
-      status: 'en-progreso',
-      actions: ['Modelado de productos y variantes', 'Alertas de stock bajo', 'Integración con caja y servicios']
+      description: 'Catálogo de productos y control de stock para el plan Pro.',
+      status: 'online',
+      actions: ['Crear productos retail e internos', 'Registrar compras y ventas', 'Reportes básicos de stock y consumo']
     },
     {
       context: 'Caja',
-      description: 'Cierre de caja y seguimiento de ventas programado para la versión Pro.',
-      status: 'en-progreso',
-      actions: ['Registro de ventas por servicio', 'Conciliación diaria', 'Métricas de tickets por barbero']
+      description: 'Facturación POS con integración a pasarela y arqueo diario.',
+      status: 'online',
+      actions: ['Apertura y cierre de caja', 'Pagos POS con pasarela simulada', 'Reporte de ventas aprobadas/rechazadas']
     },
     {
       context: 'Reportes',
@@ -107,6 +120,9 @@ export class AppComponent implements OnInit {
     { path: '/api/v1/clientes/reseñas', description: 'Registro y lectura de reseñas vinculadas a cohortes' },
     { path: '/api/v1/clientes/fidelizacion/acciones', description: 'Acreditación de puntos, notas y recordatorios' },
     { path: '/api/v1/clientes/notificaciones', description: 'Gestión de notificaciones y recordatorios a clientes' }
+    { path: '/api/clientes', description: 'Registro y listado de clientes' },
+    { path: '/api/v1/inventario', description: 'Productos, compras/ventas y reportes de stock' },
+    { path: '/api/v1/caja', description: 'Apertura/cierre de caja, pagos POS y reportes de ventas' }
   ];
 
   readonly barbers = signal<BarberResponse[]>([]);
@@ -116,14 +132,21 @@ export class AppComponent implements OnInit {
   readonly reviews = signal<ClientReview[]>([]);
   readonly loyaltyActions = signal<LoyaltyActionResponse[]>([]);
   readonly notifications = signal<ClientNotificationResponse[]>([]);
+  readonly products = signal<ProductResponse[]>([]);
+  readonly stockReport = signal<StockSnapshot[]>([]);
+  readonly salesProjection = signal<SalesProjection[]>([]);
+  readonly cashSession = signal<CashSessionResponse | null>(null);
+  readonly salesReport = signal<SalesReport | null>(null);
 
   readonly hasBarbers = computed(() => this.barbers().length > 0);
   readonly hasClients = computed(() => this.clients().length > 0);
   readonly hasAppointments = computed(() => this.appointments().length > 0);
+  readonly hasProducts = computed(() => this.products().length > 0);
   readonly summary = computed(() => ({
     barbers: this.barbers().length,
     clients: this.clients().length,
-    appointments: this.appointments().length
+    appointments: this.appointments().length,
+    products: this.products().length
   }));
   readonly sortedAppointments = computed(() =>
     [...this.appointments()].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
@@ -133,6 +156,8 @@ export class AppComponent implements OnInit {
   requestSuccess = '';
   loadingCatalogs = false;
   loadingAppointments = false;
+  loadingInventory = false;
+  loadingPayments = false;
   submittingClient = false;
   submittingAppointment = false;
   clientResetKey = 0;
@@ -144,6 +169,8 @@ export class AppComponent implements OnInit {
     this.loadCatalogs();
     this.loadAppointments();
     this.loadClientInsights();
+    this.loadInventory();
+    this.loadCashData();
   }
 
   loadCatalogs(): void {
@@ -242,6 +269,107 @@ export class AppComponent implements OnInit {
       error: (err) => {
         this.submittingAppointment = false;
         this.handleError('No se pudo crear la cita', err);
+      }
+    });
+  }
+
+  loadInventory(): void {
+    this.loadingInventory = true;
+    forkJoin({
+      products: this.http.get<ProductResponse[]>(`${this.apiV1}/inventario/productos`),
+      stock: this.http.get<StockSnapshot[]>(`${this.apiV1}/inventario/reportes/stock`),
+      sales: this.http.get<SalesProjection[]>(`${this.apiV1}/inventario/reportes/ventas`)
+    }).subscribe({
+      next: ({ products, stock, sales }) => {
+        this.products.set(products);
+        this.stockReport.set(stock);
+        this.salesProjection.set(sales);
+        this.loadingInventory = false;
+      },
+      error: (err) => {
+        this.loadingInventory = false;
+        this.handleError('No se pudo cargar inventario', err);
+      }
+    });
+  }
+
+  createProduct(payload: ProductPayload): void {
+    this.http.post<ProductResponse>(`${this.apiV1}/inventario/productos`, payload).subscribe({
+      next: (product) => {
+        this.products.set([product, ...this.products()]);
+        this.loadInventory();
+        this.requestSuccess = `Producto ${product.name} creado.`;
+      },
+      error: (err) => this.handleError('No se pudo crear el producto', err)
+    });
+  }
+
+  registerPurchase(payload: MovementPayload): void {
+    this.http.post(`${this.apiV1}/inventario/movimientos/compra`, payload).subscribe({
+      next: () => this.loadInventory(),
+      error: (err) => this.handleError('No se pudo registrar la compra', err)
+    });
+  }
+
+  registerSale(payload: MovementPayload): void {
+    this.http.post(`${this.apiV1}/inventario/movimientos/venta`, payload).subscribe({
+      next: () => this.loadInventory(),
+      error: (err) => this.handleError('No se pudo registrar la venta', err)
+    });
+  }
+
+  loadCashData(): void {
+    forkJoin({
+      session: this.http.get<CashSessionResponse | null>(`${this.apiV1}/caja/estado`),
+      report: this.http.get<SalesReport>(`${this.apiV1}/caja/reportes/ventas`)
+    }).subscribe({
+      next: ({ session, report }) => {
+        this.cashSession.set(session ? { ...session, open: session.closedAt === null } : null);
+        this.salesReport.set(report);
+      },
+      error: (err) => this.handleError('No se pudo cargar el estado de caja', err)
+    });
+  }
+
+  openCashRegister(amount: number): void {
+    this.loadingPayments = true;
+    this.http.post<CashSessionResponse>(`${this.apiV1}/caja/aperturas`, { openingAmount: amount }).subscribe({
+      next: (session) => {
+        this.cashSession.set({ ...session, open: true });
+        this.loadingPayments = false;
+      },
+      error: (err) => {
+        this.loadingPayments = false;
+        this.handleError('No se pudo abrir la caja', err);
+      }
+    });
+  }
+
+  closeCashRegister(amount: number): void {
+    this.loadingPayments = true;
+    this.http.post<CashSessionResponse>(`${this.apiV1}/caja/cierres`, { closingAmount: amount }).subscribe({
+      next: (session) => {
+        this.cashSession.set({ ...session, open: false });
+        this.loadingPayments = false;
+      },
+      error: (err) => {
+        this.loadingPayments = false;
+        this.handleError('No se pudo cerrar la caja', err);
+      }
+    });
+  }
+
+  registerPayment(payload: PaymentPayload): void {
+    this.loadingPayments = true;
+    this.http.post(`${this.apiV1}/caja/pagos`, payload).subscribe({
+      next: () => {
+        this.loadingPayments = false;
+        this.loadCashData();
+        this.requestSuccess = 'Pago registrado en POS.';
+      },
+      error: (err) => {
+        this.loadingPayments = false;
+        this.handleError('No se pudo registrar el pago', err);
       }
     });
   }
