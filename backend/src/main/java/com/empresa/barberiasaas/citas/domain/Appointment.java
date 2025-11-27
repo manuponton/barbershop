@@ -13,14 +13,16 @@ public final class Appointment {
     private final String clientName;
     private final String barberName;
     private final String service;
+    private final UUID sucursalId;
 
-    public Appointment(UUID id, LocalDateTime startAt, Duration duration, String clientName, String barberName, String service) {
+    public Appointment(UUID id, LocalDateTime startAt, Duration duration, String clientName, String barberName, String service, UUID sucursalId) {
         this.id = Objects.requireNonNull(id, "id");
         this.startAt = Objects.requireNonNull(startAt, "startAt");
         this.duration = Objects.requireNonNull(duration, "duration");
         this.clientName = Objects.requireNonNull(clientName, "clientName");
         this.barberName = Objects.requireNonNull(barberName, "barberName");
         this.service = Objects.requireNonNull(service, "service");
+        this.sucursalId = Objects.requireNonNull(sucursalId, "sucursalId");
     }
 
     public UUID id() {
@@ -45,5 +47,9 @@ public final class Appointment {
 
     public String service() {
         return service;
+    }
+
+    public UUID sucursalId() {
+        return sucursalId;
     }
 }

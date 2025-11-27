@@ -1,0 +1,25 @@
+<section class="branch-selector" *ngIf="branches.length">
+  <header>
+    <p class="eyebrow">Multi-sucursal</p>
+    <h3>Selecciona la sede para operar</h3>
+    <p class="hint">Las citas, barberos y clientes se guardarán en la sede seleccionada.</p>
+  </header>
+
+  <div class="branch-grid">
+    <button
+      type="button"
+      class="branch-card"
+      *ngFor="let branch of branches"
+      [class.active]="branch.id === selectedBranchId"
+      (click)="onSelect(branch.id)"
+    >
+      <div class="badge">{{ branch.ciudad }}</div>
+      <h4>{{ branch.nombre }}</h4>
+      <p class="address">{{ branch.direccion }}</p>
+      <p class="tagline">{{ branch.branding.tagline }}</p>
+      <div class="availability">
+        <span *ngFor="let rule of branch.disponibilidad">{{ rule.dia | titlecase }}: {{ rule.abre }} - {{ rule.cierra }}</span>
+      </div>
+    </button>
+  </div>
+</section>

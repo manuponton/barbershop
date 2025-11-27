@@ -2,6 +2,7 @@ package com.empresa.barberiasaas.clientes.application;
 
 import com.empresa.barberiasaas.clientes.domain.AccionDeFidelizacionAplicada;
 import com.empresa.barberiasaas.clientes.domain.Client;
+import com.empresa.barberiasaas.sucursales.application.SucursalDirectory;
 import com.empresa.barberiasaas.clientes.domain.ClientLifecycleStatus;
 import com.empresa.barberiasaas.clientes.domain.ClientNotification;
 import com.empresa.barberiasaas.clientes.domain.ClientReview;
@@ -30,6 +31,17 @@ import java.util.UUID;
 public class ClientRegistry {
 
     private final List<Client> clients = new ArrayList<>();
+    private final SucursalDirectory sucursalDirectory;
+
+    public ClientRegistry(SucursalDirectory sucursalDirectory) {
+        this.sucursalDirectory = sucursalDirectory;
+    }
+
+    public Client register(@NotBlank String name, @Email String email, @Past LocalDate birthday, UUID sucursalId) {
+        sucursalDirectory.byId(sucursalId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Sucursal no encontrada"));
+
+        Client client = new Client(UUID.randomUUID(), sucursalId, name, email, birthday);
     private final List<ClientSegment> segments = new ArrayList<>();
     private final List<ClientReview> reviews = new ArrayList<>();
     private final List<LoyaltyAction> loyaltyActions = new ArrayList<>();

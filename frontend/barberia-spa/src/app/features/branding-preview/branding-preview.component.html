@@ -1,0 +1,13 @@
+<section class="branding" *ngIf="branch">
+  <h3>Branding activo: {{ branch.nombre }}</h3>
+  <p class="tagline">{{ branding?.tagline }}</p>
+  <div class="swatches">
+    <span class="swatch" [style.background]="branding?.primaryColor">Primario</span>
+    <span class="swatch" [style.background]="branding?.secondaryColor">Secundario</span>
+    <span class="swatch" [style.background]="branding?.accentColor">Acento</span>
+  </div>
+  <div class="meta">
+    <span class="pill">Slug: {{ branch.slug }}</span>
+    <span class="pill">Ciudad: {{ branch.ciudad }}</span>
+  </div>
+</section>

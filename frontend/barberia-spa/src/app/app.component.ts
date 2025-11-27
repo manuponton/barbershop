@@ -7,12 +7,15 @@ import {
   AppointmentPayload,
   AppointmentResponse,
   BarberResponse,
+  CatalogItem,
+  CatalogoResponse,
   CashSessionResponse,
   ClientPayload,
   ClientNotificationResponse,
   ClientResponse,
   EndpointDescriptor,
   FeatureCard,
+  SucursalResponse
   ClientSegment,
   ClientReview,
   LoyaltyActionResponse
@@ -31,6 +34,9 @@ import { AppointmentFormComponent } from './components/appointment-form/appointm
 import { CatalogPanelComponent } from './components/catalog-panel/catalog-panel.component';
 import { EndpointsListComponent } from './components/endpoints-list/endpoints-list.component';
 import { FeatureMapComponent } from './components/feature-map/feature-map.component';
+import { BranchSelectorComponent } from './features/branch-selector/branch-selector.component';
+import { BrandingPreviewComponent } from './features/branding-preview/branding-preview.component';
+import { CatalogShowcaseComponent } from './features/catalog-showcase/catalog-showcase.component';
 import { ClientCampaignsComponent } from './features/clientes/client-campaigns/client-campaigns.component';
 import { ClientCohortsComponent } from './features/clientes/client-cohorts/client-cohorts.component';
 import { ClientReviewsComponent } from './features/clientes/client-reviews/client-reviews.component';
@@ -50,6 +56,9 @@ import { SalesViewComponent } from './features/sales-view/sales-view.component';
     CatalogPanelComponent,
     EndpointsListComponent,
     FeatureMapComponent,
+    BranchSelectorComponent,
+    BrandingPreviewComponent,
+    CatalogShowcaseComponent
     ClientCampaignsComponent,
     ClientCohortsComponent,
     ClientReviewsComponent
@@ -57,7 +66,7 @@ import { SalesViewComponent } from './features/sales-view/sales-view.component';
     SalesViewComponent
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
   readonly title = 'Barbería SaaS';
@@ -115,6 +124,9 @@ export class AppComponent implements OnInit {
   readonly endpoints: EndpointDescriptor[] = [
     { path: '/api/citas', description: 'Crear y consultar citas (POST, GET)' },
     { path: '/api/barberos', description: 'Catálogo base de barberos' },
+    { path: '/api/clientes', description: 'Registro y listado de clientes' },
+    { path: '/api/v1/sucursales', description: 'Contexto multi-sucursal y branding' },
+    { path: '/api/v1/catalogo', description: 'Catálogo público para vitrina online' }
     { path: '/api/v1/clientes', description: 'Registro, ciclo de vida y catálogo de clientes' },
     { path: '/api/v1/clientes/segmentos', description: 'Segmentación con recordatorios (POST, GET)' },
     { path: '/api/v1/clientes/reseñas', description: 'Registro y lectura de reseñas vinculadas a cohortes' },
@@ -125,9 +137,12 @@ export class AppComponent implements OnInit {
     { path: '/api/v1/caja', description: 'Apertura/cierre de caja, pagos POS y reportes de ventas' }
   ];
 
+  readonly sucursales = signal<SucursalResponse[]>([]);
+  readonly catalogos = signal<CatalogoResponse[]>([]);
   readonly barbers = signal<BarberResponse[]>([]);
   readonly clients = signal<ClientResponse[]>([]);
   readonly appointments = signal<AppointmentResponse[]>([]);
+  readonly selectedSucursalId = signal<string>('');
   readonly segments = signal<ClientSegment[]>([]);
   readonly reviews = signal<ClientReview[]>([]);
   readonly loyaltyActions = signal<LoyaltyActionResponse[]>([]);
@@ -148,8 +163,14 @@ export class AppComponent implements OnInit {
     appointments: this.appointments().length,
     products: this.products().length
   }));
+  readonly selectedSucursal = computed(() => this.sucursales().find((s) => s.id === this.selectedSucursalId()));
+  readonly scopedBarbers = computed(() => this.barbers().filter((b) => b.sucursalId === this.selectedSucursalId()));
+  readonly scopedClients = computed(() => this.clients().filter((c) => c.sucursalId === this.selectedSucursalId()));
+  readonly scopedAppointments = computed(() =>
+    this.appointments().filter((a) => a.sucursalId === this.selectedSucursalId())
+  );
   readonly sortedAppointments = computed(() =>
-    [...this.appointments()].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
+    [...this.scopedAppointments()].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
   );
 
   requestError = '';
@@ -166,8 +187,10 @@ export class AppComponent implements OnInit {
   constructor(private readonly http: HttpClient) {}
 
   ngOnInit(): void {
+    this.loadSucursales();
     this.loadCatalogs();
     this.loadAppointments();
+    this.loadPublicCatalog();
     this.loadClientInsights();
     this.loadInventory();
     this.loadCashData();
@@ -202,6 +225,29 @@ export class AppComponent implements OnInit {
     });
   }
 
+  loadSucursales(): void {
+    this.http.get<SucursalResponse[]>(`${this.apiBase}/v1/sucursales`).subscribe({
+      next: (branches) => {
+        this.sucursales.set(branches);
+        if (!this.selectedSucursalId() && branches.length) {
+          this.selectedSucursalId.set(branches[0].id);
+        }
+      },
+      error: (err) => this.handleError('No se pudieron cargar las sucursales', err)
+    });
+  }
+
+  loadPublicCatalog(): void {
+    this.http.get<CatalogoResponse[]>(`${this.apiBase}/v1/catalogo`).subscribe({
+      next: (catalog) => this.catalogos.set(catalog),
+      error: (err) => this.handleError('No se pudo cargar el catálogo', err)
+    });
+  }
+
+  changeSucursal(id: string): void {
+    this.selectedSucursalId.set(id);
+  }
+
   loadClientInsights(): void {
     forkJoin({
       segments: this.http.get<ClientSegment[]>(`${this.clientApiBase}/clientes/segmentos`),
@@ -226,6 +272,8 @@ export class AppComponent implements OnInit {
     if (this.submittingClient) {
       return;
     }
+
+    payload.sucursalId ||= this.selectedSucursalId();
 
     this.submittingClient = true;
 
@@ -253,6 +301,8 @@ export class AppComponent implements OnInit {
 
     this.submittingAppointment = true;
 
+    payload.sucursalId ||= this.selectedSucursalId();
+
     const body = {
       ...payload,
       startAt: payload.startAt,
@@ -273,6 +323,8 @@ export class AppComponent implements OnInit {
     });
   }
 
+  reserveFromCatalog(item: CatalogItem): void {
+    this.requestSuccess = `${item.nombre} preparado para compra o agenda en ${this.selectedSucursal()?.nombre ?? ''}.`;
   loadInventory(): void {
     this.loadingInventory = true;
     forkJoin({

@@ -7,13 +7,15 @@ import jakarta.validation.constraints.Positive;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record AppointmentRequest(
         @NotBlank String clientName,
         @NotBlank String barberName,
         @NotBlank String service,
         @NotNull @FutureOrPresent LocalDateTime startAt,
-        @NotNull @Positive long durationMinutes
+        @NotNull @Positive long durationMinutes,
+        @NotNull UUID sucursalId
 ) {
     public Duration duration() {
         return Duration.ofMinutes(durationMinutes);

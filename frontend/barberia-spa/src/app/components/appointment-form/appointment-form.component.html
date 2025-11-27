@@ -8,6 +8,13 @@
   </p>
   <form class="form" [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
     <label>
+      Sucursal
+      <select formControlName="sucursalId">
+        <option value="" disabled>Selecciona una sucursal</option>
+        <option *ngFor="let branch of branches" [value]="branch.id">{{ branch.nombre }}</option>
+      </select>
+    </label>
+    <label>
       Cliente
       <select formControlName="clientName">
         <option value="" disabled>Selecciona un cliente</option>
