@@ -4,77 +4,77 @@ import com.empresa.barberiasaas.sucursales.domain.AvailabilityRule;
 import com.empresa.barberiasaas.sucursales.domain.BrandingConfig;
 import com.empresa.barberiasaas.sucursales.domain.CatalogItem;
 import com.empresa.barberiasaas.sucursales.domain.Sucursal;
-import jakarta.annotation.PostConstruct;
+import com.empresa.barberiasaas.sucursales.infrastructure.persistence.AvailabilityRuleEntity;
+import com.empresa.barberiasaas.sucursales.infrastructure.persistence.CatalogItemEntity;
+import com.empresa.barberiasaas.sucursales.infrastructure.persistence.SucursalEntity;
+import com.empresa.barberiasaas.sucursales.infrastructure.persistence.SucursalRepository;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class SucursalDirectory {
 
-    private final List<Sucursal> sucursales = new ArrayList<>();
+    private final SucursalRepository sucursalRepository;
 
-    @PostConstruct
-    void seed() {
-        if (!sucursales.isEmpty()) {
-            return;
-        }
-
-        var centroId = UUID.fromString("11111111-1111-1111-1111-111111111111");
-        var norteId = UUID.fromString("22222222-2222-2222-2222-222222222222");
-
-        sucursales.add(new Sucursal(
-                centroId,
-                "Barbería Centro",
-                "centro",
-                "Cra 10 #20-30",
-                "Ciudad",
-                new BrandingConfig("#0f172a", "#e11d48", "#10b981", "Barbería Centro", "Cortes impecables en el corazón de la ciudad"),
-                availabilityRules(List.of(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY),
-                        LocalTime.of(9, 0), LocalTime.of(19, 0), true),
-                catalogForBranch(centroId)
-        ));
-
-        sucursales.add(new Sucursal(
-                norteId,
-                "Barbería Norte",
-                "norte",
-                "Av 5 #120-10",
-                "Ciudad",
-                new BrandingConfig("#111827", "#8b5cf6", "#f59e0b", "Barbería Norte", "Experiencias premium y spa"),
-                availabilityRules(List.of(DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY),
-                        LocalTime.of(10, 0), LocalTime.of(21, 0), true),
-                catalogForBranch(norteId)
-        ));
+    public SucursalDirectory(SucursalRepository sucursalRepository) {
+        this.sucursalRepository = sucursalRepository;
     }
 
     public List<Sucursal> all() {
-        return List.copyOf(sucursales);
+        return sucursalRepository.findAll().stream()
+                .map(this::toDomain)
+                .toList();
     }
 
     public Optional<Sucursal> byId(UUID id) {
-        return sucursales.stream().filter(s -> s.id().equals(id)).findFirst();
+        return sucursalRepository.findById(id).map(this::toDomain);
     }
 
     public List<CatalogItem> catalog(UUID sucursalId) {
-        return byId(sucursalId).map(Sucursal::catalog).orElse(List.of());
+        return sucursalRepository.findById(sucursalId)
+                .map(SucursalEntity::getCatalogItems)
+                .stream()
+                .flatMap(List::stream)
+                .map(this::toDomain)
+                .toList();
     }
 
-    private List<AvailabilityRule> availabilityRules(List<DayOfWeek> days, LocalTime open, LocalTime close, boolean online) {
-        return days.stream().map(day -> new AvailabilityRule(day, open, close, online)).toList();
+    private Sucursal toDomain(SucursalEntity entity) {
+        return new Sucursal(
+                entity.getId(),
+                entity.getNombre(),
+                entity.getSlug(),
+                entity.getDireccion(),
+                entity.getCiudad(),
+                new BrandingConfig(
+                        entity.getBrandingPrimaryColor(),
+                        entity.getBrandingHighlightColor(),
+                        entity.getBrandingAccentColor(),
+                        entity.getBrandingHeadline(),
+                        entity.getBrandingTagline()
+                ),
+                entity.getAvailabilityRules().stream().map(this::toDomain).collect(Collectors.toList()),
+                entity.getCatalogItems().stream().map(this::toDomain).collect(Collectors.toList())
+        );
     }
 
-    private List<CatalogItem> catalogForBranch(UUID branchId) {
-        return List.of(
-                new CatalogItem(UUID.randomUUID(), branchId, "Corte clásico", "Corte y estilo con toalla caliente", "servicio", BigDecimal.valueOf(35000), 40),
-                new CatalogItem(UUID.randomUUID(), branchId, "Afeitado de lujo", "Ritual de afeitado con aceites esenciales", "servicio", BigDecimal.valueOf(42000), 35),
-                new CatalogItem(UUID.randomUUID(), branchId, "Kit de cuidado de barba", "Incluye aceite y cepillo de barba", "producto", BigDecimal.valueOf(52000), null)
+    private AvailabilityRule toDomain(AvailabilityRuleEntity entity) {
+        return new AvailabilityRule(entity.getDayOfWeek(), entity.getOpenTime(), entity.getCloseTime(), entity.isOnline());
+    }
+
+    private CatalogItem toDomain(CatalogItemEntity entity) {
+        return new CatalogItem(
+                entity.getId(),
+                entity.getSucursal().getId(),
+                entity.getName(),
+                entity.getDescription(),
+                entity.getType(),
+                entity.getPrice(),
+                entity.getDurationMinutes()
         );
     }
 }
