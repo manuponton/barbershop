@@ -1,0 +1,30 @@
+<div class="appointments">
+  <header>
+    <h3>Próximas citas</h3>
+    <p class="hint">Lectura directa de `/api/citas`.</p>
+  </header>
+  <p class="hint" *ngIf="loading">Consultando citas...</p>
+  <table *ngIf="appointments.length; else emptyAppointments">
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Barbero</th>
+        <th>Servicio</th>
+        <th>Inicio</th>
+        <th>Duración</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let cita of appointments">
+        <td>{{ cita.clientName }}</td>
+        <td>{{ cita.barberName }}</td>
+        <td>{{ cita.service }}</td>
+        <td>{{ cita.startAt | date: 'short' }}</td>
+        <td>{{ cita.durationMinutes }} min</td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #emptyAppointments>
+    <p class="hint">Crea tu primera cita para ver el listado.</p>
+  </ng-template>
+</div>

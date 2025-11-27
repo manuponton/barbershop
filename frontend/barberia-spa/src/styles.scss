@@ -1,1 +1,354 @@
-/* You can add global styles to this file, and also import other style files */
+body {
+  display: block;
+  background: radial-gradient(circle at 10% 20%, #0ea5e9 0, #0ea5e930 25%, transparent 35%),
+    radial-gradient(circle at 80% 10%, #6366f1 0, #6366f130 25%, transparent 35%),
+    radial-gradient(circle at 30% 80%, #22c55e 0, #22c55e30 25%, transparent 35%),
+    #0b1120;
+  color: #e2e8f0;
+  min-height: 100vh;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  margin: 0;
+}
+
+main.layout {
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.hero {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.9));
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  border-radius: 20px;
+  padding: 2rem;
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin: 0.25rem 0 1rem;
+  color: #f8fafc;
+}
+
+.hero .lead {
+  color: #cbd5e1;
+  max-width: 780px;
+  line-height: 1.6;
+}
+
+.eyebrow {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: #67e8f9;
+  margin: 0;
+}
+
+.cta {
+  margin-top: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.alerts {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.alert {
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.alert.success {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #bbf7d0;
+}
+
+.alert.error {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fecdd3;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #22c55e, #14b8a6);
+  color: #0b1120;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(20, 184, 166, 0.35);
+}
+
+.btn.ghost {
+  background: transparent;
+  color: #67e8f9;
+  border-color: rgba(103, 232, 249, 0.5);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.metrics {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.metric h2 {
+  margin: 0.25rem 0 0.35rem;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+}
+
+.metric .hint {
+  margin: 0;
+}
+
+.card {
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+}
+
+.card h2 {
+  margin: 0 0 0.5rem;
+  color: #f8fafc;
+}
+
+.card p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+.actions .form-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.form input,
+.form select {
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.6);
+  color: #f1f5f9;
+}
+
+.form button {
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+.hint {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.data-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.data-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.actions-inline {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.list li {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list strong {
+  color: #f8fafc;
+}
+
+.list small {
+  color: #cbd5e1;
+}
+
+.appointments table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.appointments th,
+.appointments td {
+  text-align: left;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.appointments th {
+  color: #cbd5e1;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.appointments td {
+  color: #e2e8f0;
+}
+
+.endpoints ul {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.endpoints li {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.endpoints code {
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  color: #bef264;
+}
+
+.endpoints span {
+  color: #cbd5e1;
+}
+
+.feature-map {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 0.75rem;
+}
+
+.feature-card {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.feature-card.online {
+  border-color: rgba(34, 197, 94, 0.6);
+  box-shadow: 0 8px 30px rgba(34, 197, 94, 0.2);
+}
+
+.feature-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.feature-card h3 {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.feature-card ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.status {
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 250, 252, 0.3);
+  font-size: 0.85rem;
+  color: #f1f5f9;
+}
+
+.status.active {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #bbf7d0;
+}
+
+@media (max-width: 640px) {
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -1,43 +1,39 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
 import { forkJoin } from 'rxjs';
-
-interface BarberResponse {
-  id: string;
-  name: string;
-  services: string[];
-}
-
-interface ClientResponse {
-  id: string;
-  name: string;
-  email: string;
-  birthday: string;
-}
-
-interface AppointmentResponse {
-  id: string;
-  clientName: string;
-  barberName: string;
-  service: string;
-  startAt: string;
-  durationMinutes: number;
-}
-
-interface FeatureCard {
-  context: string;
-  description: string;
-  status: 'online' | 'en-progreso';
-  actions: string[];
-}
+import {
+  AppointmentPayload,
+  AppointmentResponse,
+  BarberResponse,
+  ClientPayload,
+  ClientResponse,
+  EndpointDescriptor,
+  FeatureCard
+} from './models';
+import { HeroSectionComponent } from './components/hero-section/hero-section.component';
+import { MetricsGridComponent } from './components/metrics-grid/metrics-grid.component';
+import { ClientFormComponent } from './components/client-form/client-form.component';
+import { AppointmentFormComponent } from './components/appointment-form/appointment-form.component';
+import { CatalogPanelComponent } from './components/catalog-panel/catalog-panel.component';
+import { EndpointsListComponent } from './components/endpoints-list/endpoints-list.component';
+import { FeatureMapComponent } from './components/feature-map/feature-map.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    HeroSectionComponent,
+    MetricsGridComponent,
+    ClientFormComponent,
+    AppointmentFormComponent,
+    CatalogPanelComponent,
+    EndpointsListComponent,
+    FeatureMapComponent
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -88,25 +84,11 @@ export class AppComponent implements OnInit {
     }
   ];
 
-  readonly endpoints = [
+  readonly endpoints: EndpointDescriptor[] = [
     { path: '/api/citas', description: 'Crear y consultar citas (POST, GET)' },
     { path: '/api/barberos', description: 'Catálogo base de barberos' },
     { path: '/api/clientes', description: 'Registro y listado de clientes' }
   ];
-
-  readonly clientForm = this.fb.group({
-    name: ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, Validators.email]],
-    birthday: ['', Validators.required]
-  });
-
-  readonly appointmentForm = this.fb.group({
-    clientName: ['', Validators.required],
-    barberName: ['', Validators.required],
-    service: ['Corte + estilo', Validators.required],
-    startAt: [this.defaultStartAt(), Validators.required],
-    duration: [30, [Validators.required, Validators.min(10)]]
-  });
 
   readonly barbers = signal<BarberResponse[]>([]);
   readonly clients = signal<ClientResponse[]>([]);
@@ -121,9 +103,7 @@ export class AppComponent implements OnInit {
     appointments: this.appointments().length
   }));
   readonly sortedAppointments = computed(() =>
-    [...this.appointments()].sort(
-      (a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime()
-    )
+    [...this.appointments()].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
   );
 
   requestError = '';
@@ -132,8 +112,10 @@ export class AppComponent implements OnInit {
   loadingAppointments = false;
   submittingClient = false;
   submittingAppointment = false;
+  clientResetKey = 0;
+  appointmentResetKey = 0;
 
-  constructor(private readonly http: HttpClient, private readonly fb: FormBuilder) {}
+  constructor(private readonly http: HttpClient) {}
 
   ngOnInit(): void {
     this.loadCatalogs();
@@ -169,7 +151,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  registerClient(): void {
+  registerClient(payload: ClientPayload): void {
     this.requestError = '';
     this.requestSuccess = '';
 
@@ -177,21 +159,14 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    if (this.clientForm.invalid) {
-      this.clientForm.markAllAsTouched();
-      return;
-    }
-
-    const payload = this.clientForm.getRawValue();
-
     this.submittingClient = true;
 
     this.http.post<ClientResponse>(`${this.apiBase}/clientes`, payload).subscribe({
       next: (client) => {
         this.clients.set([client, ...this.clients()]);
         this.requestSuccess = `Cliente ${client.name} registrado.`;
-        this.clientForm.reset();
         this.submittingClient = false;
+        this.clientResetKey++;
       },
       error: (err) => {
         this.submittingClient = false;
@@ -200,7 +175,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  createAppointment(): void {
+  createAppointment(payload: AppointmentPayload): void {
     this.requestError = '';
     this.requestSuccess = '';
 
@@ -208,32 +183,20 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    if (this.appointmentForm.invalid) {
-      this.appointmentForm.markAllAsTouched();
-      return;
-    }
-
-    const raw = this.appointmentForm.getRawValue();
-    const payload = {
-      ...raw,
-      startAt: raw.startAt,
-      durationMinutes: Number(raw.duration)
-    };
-
     this.submittingAppointment = true;
 
-    this.http.post<AppointmentResponse>(`${this.apiBase}/citas`, payload).subscribe({
+    const body = {
+      ...payload,
+      startAt: payload.startAt,
+      durationMinutes: Number(payload.duration)
+    };
+
+    this.http.post<AppointmentResponse>(`${this.apiBase}/citas`, body).subscribe({
       next: (appointment) => {
         this.appointments.set([appointment, ...this.appointments()]);
         this.requestSuccess = 'Cita creada correctamente.';
-        this.appointmentForm.reset({
-          service: 'Corte + estilo',
-          duration: 30,
-          startAt: this.defaultStartAt(),
-          clientName: '',
-          barberName: ''
-        });
         this.submittingAppointment = false;
+        this.appointmentResetKey++;
       },
       error: (err) => {
         this.submittingAppointment = false;
@@ -245,11 +208,5 @@ export class AppComponent implements OnInit {
   private handleError(message: string, err: unknown): void {
     console.error(message, err);
     this.requestError = message;
-  }
-
-  private defaultStartAt(): string {
-    const date = new Date();
-    date.setMinutes(date.getMinutes() + 30);
-    return date.toISOString().slice(0, 16);
   }
 }

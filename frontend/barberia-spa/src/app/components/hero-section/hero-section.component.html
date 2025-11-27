@@ -1,0 +1,17 @@
+<section class="hero">
+  <p class="eyebrow">Arquitectura hexagonal • CQRS • PWA</p>
+  <h1>{{ title }}</h1>
+  <p class="lead">
+    SPA conectada al backend WebFlux: registra clientes, consulta barberos sembrados y agenda citas en vivo contra los endpoints
+    expuestos.
+  </p>
+  <div class="cta">
+    <a class="btn" href="/api/citas" rel="noreferrer">Probar API de citas</a>
+    <a class="btn ghost" href="/api/barberos" rel="noreferrer">Ver barberos seed</a>
+  </div>
+
+  <div class="alerts">
+    <p class="alert success" *ngIf="requestSuccess">{{ requestSuccess }}</p>
+    <p class="alert error" *ngIf="requestError">{{ requestError }}</p>
+  </div>
+</section>

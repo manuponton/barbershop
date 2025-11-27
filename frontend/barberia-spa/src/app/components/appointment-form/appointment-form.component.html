@@ -1,0 +1,40 @@
+<article class="card form-card">
+  <header>
+    <p class="eyebrow">Citas</p>
+    <h2>Agendar cita</h2>
+  </header>
+  <p class="hint" *ngIf="!clients.length || !barbers.length">
+    Registra un cliente y utiliza un barbero seed para habilitar el formulario.
+  </p>
+  <form class="form" [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+    <label>
+      Cliente
+      <select formControlName="clientName">
+        <option value="" disabled>Selecciona un cliente</option>
+        <option *ngFor="let client of clients" [value]="client.name">{{ client.name }}</option>
+      </select>
+    </label>
+    <label>
+      Barbero
+      <select formControlName="barberName">
+        <option value="" disabled>Selecciona un barbero</option>
+        <option *ngFor="let barber of barbers" [value]="barber.name">{{ barber.name }} ({{ barber.services.join(', ') }})</option>
+      </select>
+    </label>
+    <label>
+      Servicio
+      <input type="text" formControlName="service" placeholder="Corte + barba" />
+    </label>
+    <label>
+      Inicio
+      <input type="datetime-local" formControlName="startAt" />
+    </label>
+    <label>
+      Duración (min)
+      <input type="number" min="10" step="5" formControlName="duration" />
+    </label>
+    <button class="btn" type="submit" [disabled]="isDisabled">
+      {{ submitting ? 'Creando...' : 'Crear cita' }}
+    </button>
+  </form>
+</article>
