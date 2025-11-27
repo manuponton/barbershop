@@ -25,7 +25,8 @@ public class AppointmentController {
                 request.barberName(),
                 request.service(),
                 request.startAt(),
-                request.duration()
+                request.duration(),
+                request.sucursalId()
         );
         return ResponseEntity.ok(AppointmentResponse.from(created));
     }

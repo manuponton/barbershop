@@ -1,18 +1,30 @@
 <main class="layout">
   <app-hero-section [title]="title" [requestSuccess]="requestSuccess" [requestError]="requestError"></app-hero-section>
 
+  <app-branch-selector
+    [branches]="sucursales()"
+    [selectedBranchId]="selectedSucursalId()"
+    (branchChange)="changeSucursal($event)"
+  ></app-branch-selector>
+
+  <app-branding-preview [branch]="selectedSucursal()"></app-branding-preview>
+
   <app-metrics-grid [summary]="summary()"></app-metrics-grid>
 
   <section class="grid actions">
     <app-client-form
       [submitting]="submittingClient"
       [resetKey]="clientResetKey"
+      [branches]="sucursales()"
+      [selectedBranchId]="selectedSucursalId()"
       (submitClient)="registerClient($event)"
     ></app-client-form>
 
     <app-appointment-form
-      [clients]="clients()"
-      [barbers]="barbers()"
+      [clients]="scopedClients()"
+      [barbers]="scopedBarbers()"
+      [branches]="sucursales()"
+      [selectedBranchId]="selectedSucursalId()"
       [submitting]="submittingAppointment"
       [resetKey]="appointmentResetKey"
       (submitAppointment)="createAppointment($event)"
@@ -28,6 +40,12 @@
     (refreshCatalogs)="loadCatalogs()"
     (refreshAppointments)="loadAppointments()"
   ></app-catalog-panel>
+
+  <app-catalog-showcase
+    [catalogos]="catalogos()"
+    [selectedBranchId]="selectedSucursalId()"
+    (reserveService)="reserveFromCatalog($event)"
+  ></app-catalog-showcase>
 
   <app-endpoints-list [endpoints]="endpoints"></app-endpoints-list>
 

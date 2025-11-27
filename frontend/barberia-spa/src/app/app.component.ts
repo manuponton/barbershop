@@ -7,10 +7,13 @@ import {
   AppointmentPayload,
   AppointmentResponse,
   BarberResponse,
+  CatalogItem,
+  CatalogoResponse,
   ClientPayload,
   ClientResponse,
   EndpointDescriptor,
-  FeatureCard
+  FeatureCard,
+  SucursalResponse
 } from './models';
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
 import { MetricsGridComponent } from './components/metrics-grid/metrics-grid.component';
@@ -19,6 +22,9 @@ import { AppointmentFormComponent } from './components/appointment-form/appointm
 import { CatalogPanelComponent } from './components/catalog-panel/catalog-panel.component';
 import { EndpointsListComponent } from './components/endpoints-list/endpoints-list.component';
 import { FeatureMapComponent } from './components/feature-map/feature-map.component';
+import { BranchSelectorComponent } from './features/branch-selector/branch-selector.component';
+import { BrandingPreviewComponent } from './features/branding-preview/branding-preview.component';
+import { CatalogShowcaseComponent } from './features/catalog-showcase/catalog-showcase.component';
 
 @Component({
   selector: 'app-root',
@@ -32,7 +38,10 @@ import { FeatureMapComponent } from './components/feature-map/feature-map.compon
     AppointmentFormComponent,
     CatalogPanelComponent,
     EndpointsListComponent,
-    FeatureMapComponent
+    FeatureMapComponent,
+    BranchSelectorComponent,
+    BrandingPreviewComponent,
+    CatalogShowcaseComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -87,12 +96,17 @@ export class AppComponent implements OnInit {
   readonly endpoints: EndpointDescriptor[] = [
     { path: '/api/citas', description: 'Crear y consultar citas (POST, GET)' },
     { path: '/api/barberos', description: 'Catálogo base de barberos' },
-    { path: '/api/clientes', description: 'Registro y listado de clientes' }
+    { path: '/api/clientes', description: 'Registro y listado de clientes' },
+    { path: '/api/v1/sucursales', description: 'Contexto multi-sucursal y branding' },
+    { path: '/api/v1/catalogo', description: 'Catálogo público para vitrina online' }
   ];
 
+  readonly sucursales = signal<SucursalResponse[]>([]);
+  readonly catalogos = signal<CatalogoResponse[]>([]);
   readonly barbers = signal<BarberResponse[]>([]);
   readonly clients = signal<ClientResponse[]>([]);
   readonly appointments = signal<AppointmentResponse[]>([]);
+  readonly selectedSucursalId = signal<string>('');
 
   readonly hasBarbers = computed(() => this.barbers().length > 0);
   readonly hasClients = computed(() => this.clients().length > 0);
@@ -102,8 +116,14 @@ export class AppComponent implements OnInit {
     clients: this.clients().length,
     appointments: this.appointments().length
   }));
+  readonly selectedSucursal = computed(() => this.sucursales().find((s) => s.id === this.selectedSucursalId()));
+  readonly scopedBarbers = computed(() => this.barbers().filter((b) => b.sucursalId === this.selectedSucursalId()));
+  readonly scopedClients = computed(() => this.clients().filter((c) => c.sucursalId === this.selectedSucursalId()));
+  readonly scopedAppointments = computed(() =>
+    this.appointments().filter((a) => a.sucursalId === this.selectedSucursalId())
+  );
   readonly sortedAppointments = computed(() =>
-    [...this.appointments()].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
+    [...this.scopedAppointments()].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())
   );
 
   requestError = '';
@@ -118,8 +138,10 @@ export class AppComponent implements OnInit {
   constructor(private readonly http: HttpClient) {}
 
   ngOnInit(): void {
+    this.loadSucursales();
     this.loadCatalogs();
     this.loadAppointments();
+    this.loadPublicCatalog();
   }
 
   loadCatalogs(): void {
@@ -151,6 +173,29 @@ export class AppComponent implements OnInit {
     });
   }
 
+  loadSucursales(): void {
+    this.http.get<SucursalResponse[]>(`${this.apiBase}/v1/sucursales`).subscribe({
+      next: (branches) => {
+        this.sucursales.set(branches);
+        if (!this.selectedSucursalId() && branches.length) {
+          this.selectedSucursalId.set(branches[0].id);
+        }
+      },
+      error: (err) => this.handleError('No se pudieron cargar las sucursales', err)
+    });
+  }
+
+  loadPublicCatalog(): void {
+    this.http.get<CatalogoResponse[]>(`${this.apiBase}/v1/catalogo`).subscribe({
+      next: (catalog) => this.catalogos.set(catalog),
+      error: (err) => this.handleError('No se pudo cargar el catálogo', err)
+    });
+  }
+
+  changeSucursal(id: string): void {
+    this.selectedSucursalId.set(id);
+  }
+
   registerClient(payload: ClientPayload): void {
     this.requestError = '';
     this.requestSuccess = '';
@@ -158,6 +203,8 @@ export class AppComponent implements OnInit {
     if (this.submittingClient) {
       return;
     }
+
+    payload.sucursalId ||= this.selectedSucursalId();
 
     this.submittingClient = true;
 
@@ -185,6 +232,8 @@ export class AppComponent implements OnInit {
 
     this.submittingAppointment = true;
 
+    payload.sucursalId ||= this.selectedSucursalId();
+
     const body = {
       ...payload,
       startAt: payload.startAt,
@@ -203,6 +252,10 @@ export class AppComponent implements OnInit {
         this.handleError('No se pudo crear la cita', err);
       }
     });
+  }
+
+  reserveFromCatalog(item: CatalogItem): void {
+    this.requestSuccess = `${item.nombre} preparado para compra o agenda en ${this.selectedSucursal()?.nombre ?? ''}.`;
   }
 
   private handleError(message: string, err: unknown): void {

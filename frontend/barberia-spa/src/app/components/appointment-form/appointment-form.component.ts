@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AppointmentPayload, BarberResponse, ClientResponse } from '../../models';
+import { AppointmentPayload, BarberResponse, ClientResponse, SucursalResponse } from '../../models';
 
 @Component({
   selector: 'app-appointment-form',
@@ -12,6 +12,8 @@ import { AppointmentPayload, BarberResponse, ClientResponse } from '../../models
 export class AppointmentFormComponent implements OnChanges {
   @Input() clients: ClientResponse[] = [];
   @Input() barbers: BarberResponse[] = [];
+  @Input() branches: SucursalResponse[] = [];
+  @Input() selectedBranchId = '';
   @Input() submitting = false;
   @Input() resetKey = 0;
   @Output() submitAppointment = new EventEmitter<AppointmentPayload>();
@@ -21,7 +23,8 @@ export class AppointmentFormComponent implements OnChanges {
     barberName: ['', Validators.required],
     service: ['Corte + estilo', Validators.required],
     startAt: [this.defaultStartAt(), Validators.required],
-    duration: [30, [Validators.required, Validators.min(10)]]
+    duration: [30, [Validators.required, Validators.min(10)]],
+    sucursalId: ['', Validators.required]
   });
 
   constructor(private readonly fb: FormBuilder) {}
@@ -30,10 +33,14 @@ export class AppointmentFormComponent implements OnChanges {
     if (changes['resetKey'] && !changes['resetKey'].firstChange) {
       this.resetForm();
     }
+
+    if (changes['selectedBranchId'] && this.selectedBranchId && !this.appointmentForm.dirty) {
+      this.appointmentForm.patchValue({ sucursalId: this.selectedBranchId });
+    }
   }
 
   get isDisabled(): boolean {
-    return !this.clients.length || !this.barbers.length || this.submitting;
+    return !this.clients.length || !this.barbers.length || this.submitting || !this.appointmentForm.value.sucursalId;
   }
 
   onSubmit(): void {

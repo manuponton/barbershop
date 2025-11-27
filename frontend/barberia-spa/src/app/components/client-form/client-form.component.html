@@ -5,6 +5,13 @@
   </header>
   <form class="form" [formGroup]="clientForm" (ngSubmit)="onSubmit()">
     <label>
+      Sucursal
+      <select formControlName="sucursalId">
+        <option value="" disabled>Selecciona una sucursal</option>
+        <option *ngFor="let branch of branches" [value]="branch.id">{{ branch.nombre }}</option>
+      </select>
+    </label>
+    <label>
       Nombre
       <input type="text" formControlName="name" placeholder="María López" />
       <span class="hint" *ngIf="clientForm.controls.name.invalid && clientForm.controls.name.touched">Nombre requerido</span>

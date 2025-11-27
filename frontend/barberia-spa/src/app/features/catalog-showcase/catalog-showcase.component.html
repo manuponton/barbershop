@@ -1,0 +1,21 @@
+<section class="catalog" *ngIf="activeItems.length">
+  <header>
+    <p class="eyebrow">Catálogo público</p>
+    <h3>Vitrina online y reservas rápidas</h3>
+    <p class="hint">Los servicios se muestran según la sede seleccionada.</p>
+  </header>
+
+  <div class="items">
+    <article class="card" *ngFor="let item of activeItems">
+      <div>
+        <p class="category">{{ item.categoria | titlecase }}</p>
+        <h4>{{ item.nombre }}</h4>
+        <p class="description">{{ item.descripcion }}</p>
+        <p class="price">{{ item.precio | currency: 'COP' }}</p>
+      </div>
+      <button type="button" class="cta" (click)="onReserve(item)">
+        {{ item.categoria === 'producto' ? 'Añadir a carrito' : 'Agendar servicio' }}
+      </button>
+    </article>
+  </div>
+</section>

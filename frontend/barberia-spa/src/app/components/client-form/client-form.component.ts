@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ClientPayload } from '../../models';
+import { ClientPayload, SucursalResponse } from '../../models';
 
 @Component({
   selector: 'app-client-form',
@@ -12,12 +12,15 @@ import { ClientPayload } from '../../models';
 export class ClientFormComponent implements OnChanges {
   @Input() submitting = false;
   @Input() resetKey = 0;
+  @Input() branches: SucursalResponse[] = [];
+  @Input() selectedBranchId = '';
   @Output() submitClient = new EventEmitter<ClientPayload>();
 
   readonly clientForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    birthday: ['', Validators.required]
+    birthday: ['', Validators.required],
+    sucursalId: ['', Validators.required]
   });
 
   constructor(private readonly fb: FormBuilder) {}
@@ -25,6 +28,10 @@ export class ClientFormComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['resetKey'] && !changes['resetKey'].firstChange) {
       this.clientForm.reset();
+    }
+
+    if (changes['selectedBranchId'] && this.selectedBranchId && !this.clientForm.dirty) {
+      this.clientForm.patchValue({ sucursalId: this.selectedBranchId });
     }
   }
 

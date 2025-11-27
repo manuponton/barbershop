@@ -1,0 +1,76 @@
+.branch-selector {
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1.5rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin-bottom: 0.3rem;
+}
+
+.hint {
+  color: #cbd5e1;
+  margin: 0.2rem 0 1rem;
+}
+
+.branch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.branch-card {
+  text-align: left;
+  padding: 1rem;
+  background: #111827;
+  color: #f1f5f9;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.branch-card:hover {
+  border-color: #7c3aed;
+  transform: translateY(-2px);
+}
+
+.branch-card.active {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 1px #22c55e;
+}
+
+.badge {
+  display: inline-block;
+  background: rgba(124, 58, 237, 0.15);
+  color: #c084fc;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.address {
+  margin: 0.3rem 0;
+  color: #cbd5e1;
+}
+
+.tagline {
+  margin: 0;
+  color: #eab308;
+  font-weight: 600;
+}
+
+.availability {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}

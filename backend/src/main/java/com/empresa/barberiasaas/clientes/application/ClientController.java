@@ -22,7 +22,7 @@ public class ClientController {
 
     @PostMapping
     public ResponseEntity<ClientResponse> register(@Valid @RequestBody ClientRequest request) {
-        var created = registry.register(request.name(), request.email(), request.birthday());
+        var created = registry.register(request.name(), request.email(), request.birthday(), request.sucursalId());
         return ResponseEntity.ok(ClientResponse.from(created));
     }
 
